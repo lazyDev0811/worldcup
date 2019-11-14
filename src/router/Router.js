@@ -6,6 +6,7 @@ import SplashScreen from '../components/SplashScreen';
 import HomeScreen from '../components/HomeScreen';
 import Web from '../components/Web';
 
+
 export const rootNavigator = createStackNavigator({
     LoginScreen: {
         screen: LoginScreen

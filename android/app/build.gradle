@@ -131,10 +131,11 @@ android {
         applicationId "com.authdemo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 25
+        versionName "0.3.6"
         manifestPlaceholders = [
-            appAuthRedirectScheme: 'https://sso-mobile.dexit.co/auth/realms/test/'
+            appAuthRedirectScheme: 'com.authdemo'
+            //appAuthRedirectScheme: 'https://sso-latest.dexit.co/auth/realms/dexit.co/'
         ]
     }
     splits {
@@ -152,6 +153,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
@@ -160,7 +169,8 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            //signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -191,6 +201,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-restart')
     implementation project(':react-native-webview')
     implementation project(':react-native-app-auth')
     implementation project(':@react-native-community_async-storage')

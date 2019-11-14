@@ -9,70 +9,96 @@ import {
     Platform,
     Alert
 } from 'react-native';
-import { emailText, passwordText, loginText, enter_email, enter_password } from '../constants/strings';
-import { NavigationActions, StackActions } from 'react-navigation';
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
-import { resetNavigation, configIOS, configAndriod } from '../utils/Helper';
-import { authorize } from 'react-native-app-auth';
+import {emailText, passwordText, loginText, enter_email, enter_password} from '../constants/strings';
+import {NavigationActions, StackActions} from 'react-navigation';
+import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
+import {
+  resetNavigation,
+  configIOS,
+  configAndriod,
+  checkTokenValid,
+} from '../utils/Helper';
+import {authorize} from 'react-native-app-auth';
 import AsyncStorage from '@react-native-community/async-storage';
 
 class LoginScreen extends React.Component {
 
     constructor(props) {
         super(props)
-        this.state = {
-            emailText: '',
-            passwordText: ''
-        }
+        // this.state = {
+        //     emailText: '',
+        //     passwordText: ''
+        // }
     }
 
     componentDidMount() {
 
     }
 
-    onEmailChange = (text) => {
-        this.setState({
-            emailText: text
-        });
-    }
-
-    onPasswordChange = (text) => {
-        this.setState({
-            passwordText: text
-        });
-    }
+    // onEmailChange = (text) => {
+    //     this.setState({
+    //         emailText: text
+    //     });
+    // }
+    //
+    // onPasswordChange = (text) => {
+    //     this.setState({
+    //         passwordText: text
+    //     });
+    // }
 
     showAlert = (message) => {
         Alert.alert(
             message
         );
     }
+    // async fetchMe() {
+    //     const resp = fetch('https://jsonplaceholder.typicode.com/todos/1');
+    //
+    //         .then(response => response.json())
+    //         .then(json => {
+    //             console.log(json);
+    //             return json;
+    //         });
+    // }
 
     onLoginPress = async () => {
-        const { emailText, passwordText } = this.state;
+
+        //const {emailText, passwordText} = this.state;
         // if (emailText.length === 0) {
         //     this.showAlert(enter_email)
         // } else if (passwordText.length === 0) {
         //     this.showAlert(enter_password)
         // } else {
-        const { navigation } = this.props;
+        const {navigation} = this.props;
         // use the client to make the auth request and receive the authState
         try {
             let config = null;
             if (Platform.OS === 'ios') {
-                config = configIOS
-            } else { config = configAndriod }
-            
+                config = configIOS;
+            } else {
+                config = configAndriod;
+            }
+            // debugger;
+            // const testme = await this.fetchMe();
+
+
             const result = await authorize(config);
+
             const accessToken = result.accessToken;
             const refreshToken = result.refreshToken;
-            const parameters = { 'accessToken': accessToken, 'refreshToken': refreshToken };
+            const accessTokenExpirationDate = result.accessTokenExpirationDate;
+
+            const parameters = {'accessToken': accessToken, 'refreshToken': refreshToken, 'accessTokenExpirationDate':accessTokenExpirationDate};
             AsyncStorage.setItem('accessToken', accessToken);
             AsyncStorage.setItem('refreshToken', refreshToken);
+            AsyncStorage.setItem('accessTokenExpirationDate', accessTokenExpirationDate);
             resetNavigation(navigation, NavigationActions, StackActions, 'HomeScreen', parameters);
 
         } catch (error) {
-            console.log(error);
+            console.log('error',error);
+            console.trace();
+            alert('there was an error contacting the server');
         }
 
         // }
@@ -85,8 +111,8 @@ class LoginScreen extends React.Component {
         //     />
         // } else {
         return (
-            <TouchableOpacity style={{ marginTop: 12 }}
-                onPress={this.onLoginPress}>
+            <TouchableOpacity style={{marginTop: 12}}
+                              onPress={this.onLoginPress}>
                 <View style={styles.loginView}>
                     <Text style={styles.loginText}>
                         {loginText}
