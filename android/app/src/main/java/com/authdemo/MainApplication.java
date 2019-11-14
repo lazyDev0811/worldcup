@@ -7,6 +7,7 @@ import com.facebook.react.PackageList;
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
+import com.avishayil.rnrestart.ReactNativeRestartPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.rnappauth.RNAppAuthPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
@@ -15,6 +16,8 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
+//for debugging
+import android.webkit.WebView;
 
 import java.util.List;
 
@@ -48,6 +51,8 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+
     SoLoader.init(this, /* native exopackage */ false);
+    //WebView.setWebContentsDebuggingEnabled(true);
   }
 }

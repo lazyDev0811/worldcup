@@ -6,9 +6,7 @@
  * @flow
  */
 
-import {
-  View, Alert
-} from 'react-native';
+import {View, Alert} from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { rootNavigator } from './src/router/Router';
 import React from 'reactn';
@@ -45,22 +43,21 @@ class App extends React.Component {
   }
 
   renderDialog() {
-
     return (
       <Dialog
         visible={this.state.dialogVisible}
-        title="Internet connection not available!">
+        title="Internet connection not available.  Please reconnect to continue">
       </Dialog>
     );
   }
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{flex: 1}}>
         {this.renderDialog()}
         <Container />
       </View>
     );
-  };
+  }
 }
 export default App;
