@@ -20,7 +20,7 @@ import {
   webText,
 } from '../constants/strings';
 import {resetNavigation, configIOS, configAndriod} from '../utils/Helper';
-import {refresh, revoke} from 'react-native-app-auth';
+
 import AsyncStorage from '@react-native-community/async-storage';
 import {default as Web} from './Web';
 let access_Token = '';
@@ -96,7 +96,7 @@ class HomeScreen extends Component {
     const {navigation} = this.props;
 
     //await this.revokeLogin(access_Token);
-    await this.revokeLogin(refresh_Token);
+//    await this.revokeLogin(refresh_Token);
 
     AsyncStorage.setItem('accessToken', '');
     AsyncStorage.setItem('refreshToken', '');
@@ -211,6 +211,7 @@ class HomeScreen extends Component {
             //key={refresh_Token}
             style={{flex: 1}}
             onlogoutPress={this.onLogoutPress}
+
           />
         </View>
         <View style={styles.buttonContainer}>

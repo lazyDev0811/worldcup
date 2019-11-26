@@ -2,13 +2,21 @@ import React from 'reactn';
 import {View, StyleSheet, Platform, Text, AppState, ActivityIndicator} from 'react-native';
 import {WebView} from 'react-native-webview';
 import PubSub from 'pubsub-js';
-import {configIOS, configAndriod} from '../utils/Helper';
+import {configIOS, configAndriod, configShared, resetNavigation} from '../utils/Helper';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
 import async from 'async';
 import {dexit} from '../assets/sdk/dex-sdk-shim';
 import uuid from 'uuid';
 import DeviceInfo from 'react-native-device-info';
+import ScanScreen from './scan-screen.js';
+import { withNavigation } from 'react-navigation';
+
+var selfWeb;
+
+// import { createStackNavigator } from 'react-navigation-stack';
+import {NavigationActions, StackActions} from 'react-navigation';
+
 
 //const hasWebAccell = () => DeviceInfo.getApiLevel() !== 28;
 
@@ -18,8 +26,9 @@ import {
 } from 'react-native-responsive-screen';
 
 //import * from '../assets/sdk/dex-sdk-shim';
-const dd = require('../assets/sdk/dex-sdk-shim.js');
+//const dd = require('../assets/sdk/dex-sdk-shim.js');
 import _ from 'lodash';
+//import dispatcher from "reactn/types/dispatcher";
 
 //import DexSDK from '../assets/sdk/dex-sdk-shim';
 let accessToken = '';
@@ -49,13 +58,15 @@ class Web extends React.Component {
       sdkInitialized: false,
       loaded: false,
       key: 1,
+      showCamera: false,
     };
 
     //TODO: should be coming from configuration
-    this.proxyAddress = 'http://dex-bcc-latest.dexit.co/proxy-api';
+    this.proxyAddress = configShared.proxyAddress;
+    //this.proxyAddress = 'http://dex-bcc-latest.dexit.co/proxy-api';
 
     this.args = {
-      sdkRequiredServices:{
+      sdkRequiredServices: {
         scpUrl: this.proxyAddress + '/scp',
         sbUrl: this.proxyAddress + '/sb',
         cbUrl: this.proxyAddress + '/cb',
@@ -85,13 +96,12 @@ class Web extends React.Component {
 
     this.dexit = dexit;
     this.uuidsToCb = {};
-    var selfWeb = this;
-
+    selfWeb = this;
 
 
     this.bccLib = {
       uuidsToCb: {},
-      onMessage: function(str) {
+      onMessage: function(str, selfRef) {
 
         try {
           var obj = JSON.parse(str);
@@ -123,16 +133,21 @@ class Web extends React.Component {
                 data.element &&
                 data.element.intelligence &&
                 data.element.intelligence.epId &&
-                data.element.intelligence.epId.startsWith('11111')
+                data.element.intelligence.epId.startsWith('1111')
               ) {
                 debugger;
                 if (data.element.intelligence.epId == '111114') {
                   selfWeb.logoutPress();
+                } else if (data.element.intelligence.epId == '111110') {
+
+                  debugger;
+                  selfRef.openCamera(data);
+
+                 // selfWeb.openCamera();
+
+                  debugger;
                 }
                 //alert(data.element.intelligence.epId);
-
-
-
               } else {
                 selfWeb.dexit.PubSub.publish('dexit.ep.show', data);
               }
@@ -220,10 +235,16 @@ class Web extends React.Component {
     };
   }
 
+
+
   // componentDidMount() {
   //   this._prepare();
   // }
   componentDidMount() {
+
+
+    debugger;
+
     if (this.state.loaded) {
       this.state.setState({loaded: false});
     }
@@ -270,6 +291,23 @@ class Web extends React.Component {
   //   }
   // }
 
+
+  openCamera = (data) => {
+
+    debugger;
+    const {navigation} = this.props;
+
+    const navigateAction = NavigationActions.navigate({
+      routeName: 'QRScreen',
+      params: {onCodeCapture: this.onCodeCapture, data: data },
+     // action: NavigationActions.navigate({ routeName: 'ScanScreen' }),
+    });
+    navigation.navigate(navigateAction);
+
+    this.setState({showCamera: true});
+  }
+
+
   _prepare = async () => {
     //accessToken = this.props.navigation.state.params.accessToken;
     try {
@@ -285,7 +323,7 @@ class Web extends React.Component {
 
         let decoded = jwtDecode(accessToken);
         this.setState({
-          email: decoded.email,
+          email: 'jake.vauden@dexit.co', //'//decoded.email || 'jake.vauden@dexit.co',
         });
       }
     } catch (err) {
@@ -560,10 +598,12 @@ class Web extends React.Component {
     return expireTime;
   }
 
+
   async loadEPCached(token, tpId, expireInMinutes = 60) {
-    debugger;
+    //debugger;
     let url =
-      'https://ep-dispatcher-latest.herokuapp.com/dispatch?touchpoint=' +
+      configShared.dispatcherUrl +
+      '/dispatch?touchpoint=' +
       encodeURIComponent(tpId);
     let data = null;
     let value = await AsyncStorage.getItem(url);
@@ -620,7 +660,7 @@ class Web extends React.Component {
       return ep;
       //set in cache
     } else {
-      debugger;
+      //debugger;
       return data;
     }
   }
@@ -785,7 +825,7 @@ class Web extends React.Component {
     let epId = toLoad.epId;
 
     // eslint-disable-next-line no-debugger
-    debugger;
+    //debugger;
 
     this.bccLib.resetAll();
     //reset uccVM observables
@@ -859,7 +899,6 @@ class Web extends React.Component {
   goMain() {
     var self = this;
     self.lastEPId = [];
-
     dexit.device.sdk.unloadEngagementPatterns(function(err) {
       if (err) {
         console.log(
@@ -874,8 +913,16 @@ class Web extends React.Component {
 
   handleMessage(event) {
     if (event.nativeEvent.data) {
-      this.bccLib.onMessage(event.nativeEvent.data);
+      this.bccLib.onMessage(event.nativeEvent.data, this);
     }
+  }
+
+  onCodeCapture(data, passThroughData) {
+    //pass in the data
+    alert('QR data:' + data);
+    debugger;
+
+    //TODO: use passThroughData to decide next action
   }
 
   sendMessage(data) {
@@ -885,6 +932,7 @@ class Web extends React.Component {
     // if (!this.webref) {
         debugger;
      // alert('no webRef');
+
       //enforce wait
       setTimeout(function(){
         self.sendMessage(data);
@@ -964,7 +1012,7 @@ class Web extends React.Component {
             mediaPlaybackRequiresUserAction={false}
             source={{html: html}}
             onLoadEnd={() => {
-              debugger;
+              //debugger;
               this.setState({viewState: 'LOADED'});
             }}
             onError={err => this.logError(err)}
@@ -983,14 +1031,19 @@ class Web extends React.Component {
                   size='large'
                   style={styles.ActivityIndicatorStyle}
               />}
+
+          {/*{!this.state.showCamera &&*/}
+          {/*<View style={styles.CameraViewIndicator}>*/}
+          {/*  <ScanScreen style={{flex: 1}} onCodeCapture={this.onCodeCapture} />*/}
+          {/*</View>}*/}
+
         </View>
       );
-    // }
   }
 }
 
 const styles = StyleSheet.create({
-  container1: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     width: wp('99%'),
@@ -1008,9 +1061,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor:'#F5FCFF88',
+    backgroundColor: '#F5FCFF88',
   },
-
+  CameraViewIndicator: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
 });
 
-export default Web;
+export default withNavigation(Web);
