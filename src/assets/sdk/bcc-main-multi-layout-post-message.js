@@ -1214,7 +1214,7 @@ dexit.BccVM = function(params) {
           $(targetRegion).css('visibility', 'visible');
         });
       } else {
-        targetRegion.classList.add('image-only');
+        //targetRegion.classList.add('image-only');
 
         var newImg = document.createElement('img');
         newImg.src = multimedia.mediaPath;

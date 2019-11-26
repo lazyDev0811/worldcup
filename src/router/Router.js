@@ -1,7 +1,10 @@
 import { createStackNavigator } from 'react-navigation';
 
 //import screens
-import LoginScreen from '../components/LoginScreen';
+import LoginScreen from '../components/LoginScreenAuto';
+//import LoginScreen from '../components/LoginScreen';
+import ScanScreen from '../components/scan-screen';
+
 import SplashScreen from '../components/SplashScreen';
 import HomeScreen from '../components/HomeScreen';
 import Web from '../components/Web';
@@ -19,7 +22,10 @@ export const rootNavigator = createStackNavigator({
     },
     WebScreen: {
         screen: Web
-    }
+    },
+    QRScreen: {
+        screen: ScanScreen
+    },
 }, {
         initialRouteName: 'SplashScreen',
         headerMode: 'none',

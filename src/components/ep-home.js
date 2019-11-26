@@ -22,7 +22,7 @@ module.exports = function() {
 
 <!--    <H1> running..</H1>-->
     <div class="status"></div>
-    <div id="merch-container" style="width:99%">
+    <div id="merch-container" style="width:100%">
     
     </div>
     <script type="application/javascript">
@@ -1388,7 +1388,7 @@ dexit.BccVM = function(params) {
           $(targetRegion).css('visibility', 'visible');
         });
       } else {
-        targetRegion.classList.add('image-only');
+        //targetRegion.classList.add('image-only');
 
         var newImg = document.createElement('img');
         newImg.src = multimedia.mediaPath;
@@ -1421,6 +1421,7 @@ dexit.BccVM = function(params) {
           nodeName === 'SPAN' ||
           nodeName === 'H1' ||
           nodeName === 'H2' ||
+          nodeName === 'P' ||
           nodeName === 'H3'
         ) {
           targetRegion.appendChild(mmTextValue);
@@ -1429,7 +1430,7 @@ dexit.BccVM = function(params) {
           }
         }else {
           mmText = document.createElement('h3');
-          mmText.classList.add('brandable-header-text');
+          //mmText.classList.add('brandable-header-text');
           mmText.appendChild(mmTextValue);
           targetRegion.appendChild(mmText);
           if (presentationStyle) {

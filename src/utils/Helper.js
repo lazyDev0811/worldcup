@@ -1,6 +1,4 @@
 
-
-
 export const resetNavigation = (navigation, NavigationActions, StackActions, route, parameters) => {
     navigation.dispatch(StackActions.reset({
         index: 0,
@@ -9,6 +7,25 @@ export const resetNavigation = (navigation, NavigationActions, StackActions, rou
         ]
     }));
 }
+
+
+export const pushNavigation = (
+  navigation,
+  NavigationActions,
+  StackActions,
+  route,
+  parameters,
+) => {
+    navigation.dispatch(StackActions.push({
+        routeName: route,
+        params: parameters
+        // index: 1,
+        // actions: [
+        //     NavigationActions.navigate({ routeName: route, params: parameters })
+        // ]
+    }));
+}
+
 
 export const configIOS = {
     // issuer: 'https://accounts.google.com',
@@ -21,7 +38,15 @@ export const configIOS = {
     // redirectUrl: 'com.googleusercontent.apps.568415197966-u37p6um9hv8m9fsfqvm41fm381j8jvsa:/oauth2redirect/',
     scopes: ['openid', 'profile'],
     channelUrl: 'http://bcc-mobile-app.dexit.co',
-    repo: 'dexitco'
+    repo: 'dexitco',
+
+};
+
+export const configShared = {
+    // proxyAddress: 'https://dex-bcc.dexit.co/proxy-api',
+    // dispatcherUrl: 'https://ep-dispatcher.dexit.co',
+    proxyAddress: 'http://dex-bcc-latest.dexit.co/proxy-api',
+    dispatcherUrl: 'https://ep-dispatcher-latest.herokuapp.com',
 };
 
 

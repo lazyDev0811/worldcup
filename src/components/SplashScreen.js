@@ -6,11 +6,18 @@ import {configAndriod, configIOS, resetNavigation} from '../utils/Helper';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import {checkTokenValid} from '../utils/Helper';
-import {refresh} from 'react-native-app-auth';
+import Auth from '../utils/auth';
+
+// import {refresh} from 'react-native-app-auth';
 
 //let refreshToken = '';
 //let accessToken = '';
 class SplashScreen extends React.Component {
+  constructor(props) {
+    super(props);
+    this.auth = new Auth();
+  }
+
   componentDidMount() {
     const self = this;
     setTimeout(function() {
@@ -28,13 +35,23 @@ class SplashScreen extends React.Component {
     let refreshToken = await AsyncStorage.getItem('refreshToken');
 
     if (refreshToken.length > 2) {
-      const result = await refresh(config, {
-        refreshToken: refreshToken,
-      });
+      // const result = await this.auth.refreshToken(refreshToken, config.clientId) refresh(config, {
+      //   refreshToken: refreshToken,
+      // });
+      const res = await this.auth.refreshToken(
+        refreshToken,
+        config.clientId,
+      );
+
+      if (res.status !== 200) {
+        throw new Error('cannot refresh');
+      }
+      let result = await result.json();
+
       let access_Token = result.accessToken;
       let refresh_Token = result.refreshToken;
       await AsyncStorage.setItem('accessToken', access_Token);
-      await AsyncStorage.setItem('refreshToken', access_Token);
+      await AsyncStorage.setItem('refreshToken', refresh_Token);
 
       //Alert.alert('Refreshed!');
       return {accessToken: access_Token, refreshToken: refresh_Token};
@@ -47,7 +64,7 @@ class SplashScreen extends React.Component {
 
   navigate() {
     const {navigation} = this.props;
-    debugger;
+
     var self = this;
     AsyncStorage.getItem('accessToken', (err, accessToken) => {
       if (accessToken !== null) {
@@ -114,10 +131,12 @@ class SplashScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Image
-          style={styles.logo}
-          source={require('../assets/icons/ic_logo.png')}
-        />
+        <View stype={styles.logoCircle}>
+          <Image
+            style={styles.logo}
+            source={require('../assets/icons/ic_logo.png')}
+          />
+        </View>
       </View>
     );
   }
@@ -125,14 +144,23 @@ class SplashScreen extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#142550',
     flex: 1,
     justifyContent: 'center',
   },
-
-  logo: {
+  logoCircle: {
     alignSelf: 'center',
     width: wp('40%'),
     height: wp('40%'),
+    borderRadius: this.width / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'red',
+  },
+  logo: {
+    alignSelf: 'center',
+    width: wp('30%'),
+    height: wp('30%'),
   },
 });
 

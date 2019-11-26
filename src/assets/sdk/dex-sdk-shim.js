@@ -10047,7 +10047,6 @@ dexit.ExecutionManager = function(config,stateStorage, scManager, pubSub) {
 
         self.stateStorage.setElementStateInfo(data.currentElement,'click',_.extend(params,data.intelligence));
         //self.stateStorage.setElementStateInfo(data.currentElement,'suspend');
-
         //call suspend
         self.suspend(data.epId,data.currentElement.id);
 
@@ -10430,7 +10429,7 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
             var vertices = eg.verticesFrom(currentElement.id);
 
             //count number of flow vertices from start and hide loader in parentRef
-            debugger;
+
             let counter = vertices.flow.length;
 
             _.each(vertices.flow, function(item) {
@@ -11671,7 +11670,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
         }
 
         var toPass =  (_.isArray(layoutId) ? layoutId[0] : layoutId);
-        debugger;
+        //debugger;
 
         AsyncStorage.getItem('layout-'+toPass, (err, data) => {
             if (data) {

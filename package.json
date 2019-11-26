@@ -1,6 +1,6 @@
 {
   "name": "AuthDemo",
-  "version": "0.2.0",
+  "version": "0.4.1",
   "private": true,
   "scripts": {
     "start": "react-native start",
@@ -27,13 +27,15 @@
     "react": "16.8.6",
     "react-devtools": "^3.6.3",
     "react-native": "0.60.5",
-    "react-native-app-auth": "^4.4.0",
+    "react-native-camera": "^3.11.1",
     "react-native-device-info": "^4.0.1",
     "react-native-gesture-handler": "^1.4.1",
+    "react-native-permissions": "^2.0.3",
+    "react-native-qrcode-scanner": "^1.3.1",
     "react-native-responsive-screen": "^1.2.2",
     "react-native-restart": "0.0.13",
     "react-native-simple-dialogs": "^1.2.0",
-    "react-native-webview": "^7.4.2",
+    "react-native-webview": "^7.5.1",
     "react-navigation": "3.9",
     "reactn": "^2.2.2",
     "sockjs-client": "^1.4.0",
@@ -43,6 +45,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/runtime": "^7.5.5",
+    "@bam.tech/react-native-make": "^1.0.3",
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-jest": "^24.9.0",
     "eslint": "^6.2.2",
