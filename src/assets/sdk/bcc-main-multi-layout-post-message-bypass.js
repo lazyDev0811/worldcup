@@ -6,7 +6,7 @@
 /*jslint nomen: true */
 /* global async, jsonata, dexit, bccLib, PubSub, _, $, videojs,  ReactNativeWebView */
 
-const SKIP_VALIDATION = false;
+const SKIP_VALIDATION = true;
 
 /**
  * Compiles a string into a jsonata expression object
@@ -47,6 +47,18 @@ async function sha256(message) {
 if (!dexit) {
   var dexit = {};
 }
+
+dexit.guid = function() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+};
+
+
 
 bccLib = (function() {
   var token, overrideContainer;
@@ -297,6 +309,14 @@ bccLib = (function() {
   var behaviourMessageMap = {};
 
   var callbackMap = {};
+  var deviceId = '';
+  function setDeviceId(id) {
+    deviceId = id;
+  }
+
+  function getDeviceId(id) {
+    return deviceId;
+  }
 
   function setBehaviourMessageMap(key, val) {
     behaviourMessageMap[key] = val;
@@ -636,7 +656,9 @@ bccLib = (function() {
     createBehaviourLB: createBehaviourLB,
     setScId: overrideScId,
     getScId: getOverridenScId,
-    handleBehaviourResponse: handleBehaviourResponse
+    handleBehaviourResponse: handleBehaviourResponse,
+    setDeviceId: setDeviceId,
+    getDeviceId: getDeviceId
   };
 })();
 
@@ -825,8 +847,6 @@ dexit.BccVM = function(params) {
           }
           self._bindBehaviour(params,form,referenceId,false,values);
         });
-
-
 
     };
 
@@ -1098,8 +1118,7 @@ dexit.BccVM = function(params) {
     self._executeBehaviour = function(params, values, referenceId, callback) {
         debugger;
 
-
-
+      var skipValidation = SKIP_VALIDATION;
 
         var args = params.args;
         var inputs = params.inputs;
@@ -1115,8 +1134,8 @@ dexit.BccVM = function(params) {
 
         //TODO: not hardcode but lookup from local helper functions
         var globalValues = {
-            deviceId: dexit.scp.device.resolution.touchpoint.deviceId,
-            msgId: 'dex'+ dexit.device.util.guid()
+            deviceId: bccLib.getDeviceId(),
+            msgId: 'dex'+ dexit.guid()
         };
         //global values
         _.extend(values, globalValues);
@@ -1182,14 +1201,26 @@ dexit.BccVM = function(params) {
 
                 //behaviour.executeWithParams(args, inputs, cb);
                 //add to callbackMap
-                var key = referenceId+'_execute';
-                bccLib.setBehaviourMessageMap(key, cb);
+              if (skipValidation) {
+                debugger;
+                cb(null, {});
 
-                var msg = {op: 'dexit.ep.executeBehaviour',
+
+
+
+                }else {
+                  var key = referenceId+'_execute';
+                  bccLib.setBehaviourMessageMap(key, cb);
+
+
+                var msg = {
+                    op: 'dexit.ep.executeBehaviour',
                     hasError: (false),
-                    data: { ref:key, scId: scId, behaviourId: behaviourId, args: {args: args, inputs:inputs} } };
-                window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+                    data: {ref: key, scId: scId, behaviourId: behaviourId, args: {args: args, inputs: inputs}}
+                  };
+                  window.ReactNativeWebView.postMessage(JSON.stringify(msg));
 
+                }
 //                behaviour.executeWithParams(args, inputs, cb);
             }]
         }, function(err, result) {

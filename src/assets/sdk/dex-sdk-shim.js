@@ -3444,7 +3444,7 @@ dexit.scp.device.Configuration = function(args) {
         touchpoint='',
         data_monitor_event_id = args.monitorEventId || '',
         data_monitor_event_key = args.monitorEventKey || '',
-        data_monitor_interval = args.monitorInterval || 8000,
+        data_monitor_interval = args.monitorInterval || 18000,
         monitor_config,
         token= args.authToken || '',
         epmurl = args.epmUrl || '/proxy-ep/epm';
@@ -5146,7 +5146,9 @@ dexit.scp.device.management.scmanager =
                 else{
 
                 }
-                scobject._monitor = dexit.scp.device.monitor.createMonitor(scobject);
+
+                //TODO: remove this
+                //scobject._monitor = dexit.scp.device.monitor.createMonitor(scobject);
 
                 callback(undefined, true);
             }
@@ -5200,15 +5202,17 @@ dexit.scp.device.management.scmanager =
         updateSmartContentObject: function (scReq, callback) {
             'use strict';
 
-            var self = this;
-            function handleUnload(err, response) {
-                if (err && err.code !== 404) {
-                    return callback(err);
-                }
-                self.loadSmartContentObject(scReq, callback);
-            }
 
-            this.unloadSmartContentObject(scReq, handleUnload)
+            callback();
+            // var self = this;
+            // function handleUnload(err, response) {
+            //     if (err && err.code !== 404) {
+            //         return callback(err);
+            //     }
+            //     self.loadSmartContentObject(scReq, callback);
+            // }
+            //
+            // this.unloadSmartContentObject(scReq, handleUnload)
 
         },
 
@@ -7955,7 +7959,13 @@ dexit.device.sdk = (function (pubSub,logger,EPHandler) {
                 result.overrideContainer = container;
             }
 
+            //what should be done if the same pattern is loaded from start (remove it?)
+            var existing = _.find(currentExecutionPatterns, {id: result.id});
 
+            if (existing && existing.time <= result.time) {
+                //remove old one
+                currentExecutionPatterns = _.reject(currentExecutionPatterns, {id: result.id});
+            }
             currentExecutionPatterns.push(result);
 
             //currentExecutionPattern = result;
@@ -8658,7 +8668,8 @@ dexit.EPHandler = function(config, dexRequestUtil, pubSub, logger){
                 {
                     date: current_date,
                     touchpoint: tp,
-                    revision:revId
+                    revision:revId,
+                    allowInactive:true
                 },
             numRetries = 0,
             maxRetries= 3,
@@ -8783,7 +8794,12 @@ dexit.EPHandler = function(config, dexRequestUtil, pubSub, logger){
             }
             //format pattern into expected format
             var pattern = engagementPattern.pattern;
-            pattern.active = engagementPattern.isActive;
+
+            //FIXME
+            pattern.active = true;
+            //pattern.active = engagementPattern.isActive;
+
+
             pattern.id = engagementPattern.id;
 
             loadEngagementPatternData(pattern,callback);
@@ -10786,18 +10802,28 @@ dexit.ExecutionManager.prototype._runElement = function(eg, currentElement, tran
             break;
         case 'behaviour':
             var behaviour = sc.behaviour[currentElement.value.typeId];
-            //pass any inputs through, for behaviours
-            behaviour.executeWithParams(getArgs(currentElement), inputs,function(err,result) {
-                if (err) {
-                    data.error = err;
-                } else {
-                    //make sure result is added with the element data field
-                    data.data = result;
-                }
-                //call behavior notification
+            var args = getArgs(currentElement);
+
+            if (behaviour.property.consumptionType && behaviour.property.consumptionType ==='api-ui-local') {
+                data.data = {args: args, inputs: inputs, props: behaviour.property};
+                data.data.url = 'local://local';
                 self._presentElement(eg, data, transition);
-                //self._publish(EXECUTE_EVENT,data);
-            });
+            }else {
+
+
+                //pass any inputs through, for behaviours
+                behaviour.executeWithParams(args, inputs, function (err, result) {
+                    if (err) {
+                        data.error = err;
+                    } else {
+                        //make sure result is added with the element data field
+                        data.data = result;
+                    }
+                    //call behavior notification
+                    self._presentElement(eg, data, transition);
+                    //self._publish(EXECUTE_EVENT,data);
+                });
+            }
             break;
         case 'decision':
             //call decision element
@@ -11477,6 +11503,42 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
     }
 
 
+    var resolveStaticPlayItem = function(playItem) {
+        var scId = playItem.scId;
+        var mmId = playItem.multimedia.id;
+        var mmType = playItem.multimedia.mmType;
+        var mmObj = dexit.scp.device.management.scmanager.smartcontent.object[scId].multimedia[mmId];
+
+        var resolved;
+        if (mmType === 'text') {
+            if (mmObj && mmObj.property && mmObj.property.content && mmObj.property.content.indexOf('{{') === -1) {
+                resolved = _.pick(mmObj, ['id','kind','property','url']);
+                // resolve =
+            }
+        }else if (mmType === 'video' || mmType === 'image' || mmType === 'link' || mmType === 'audio') {
+            if (mmObj && mmObj.property && mmObj.property.content && mmObj.property.location.indexOf('{{') === -1) {
+                resolved = _.pick(mmObj, ['id','kind','property','url']);
+            }
+        } else {
+            console.log('no matching mm');
+        }
+        if (!resolved) {
+            return;
+        }
+
+        var mmList = {'text':[],'image':[],'video':[],'audio':[],'link':[]};
+
+        if (mmList[mmType]) {
+            mmList[mmType].push(resolved);
+        }
+
+        return [{
+            scId: scId,
+            time: {},
+            multimedia:mmList
+        }];
+    };
+
     /**
      * Prepare item to be displayed
      * @param {object} touchpoint - touchpoint instance
@@ -11488,9 +11550,21 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
      */
     var initPlayItem = function(touchpoint, playItem, callback) {
 
+        //check if static playitem first
+
+
         const theUserId = (userId && userId.id ? userId.id : 'default');
         async.auto({
-            checkCache: function(cb) {
+            checkStatic: function(cb){
+                var result = resolveStaticPlayItem(playItem);
+                cb(null,result);
+            },
+            checkCache: ['checkStatic',function(result, cb) {
+                if (result.checkStatic) {
+                    return cb(null, result.checkStatic);
+                }
+
+
                 if (playItem && playItem.multimedia && playItem.multimedia.id) {
                     //check cache (cache depends on with user)
                     let key = 'mm-' +touchpoint.touchpoint + '-' + playItem.scId + '-' + playItem.multimedia.id + '-' + theUserId;
@@ -11505,12 +11579,13 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
                 }else {
                     cb();
                 }
-
-            },
+            }],
             checkService: ['checkCache', function(result, cb) {
                 if (result.checkCache) {
                     return cb(null,result.checkCache);
                 }
+                //TODO: if the playItem is not "dynamic" then can should bypass sc-presentation,
+                debugger;
                 var scheduleData = _buildScheduleDataObj(playItem);
                 scPresentationClient.createPlaylist(touchpoint.touchpoint, touchpoint.channel_id,
                     touchpoint.channel_type_id, scheduleData, userId, authToken, function(err, result) {
@@ -11709,6 +11784,47 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
 
     };
 
+
+    this._resolveEPPresentation = function(intelResult, callback) {
+        let key = 'ep-intel-pres' + '-' + intelResult.epId;
+        AsyncStorage.getItem(key, (err, cached) => {
+            if (cached) {
+                let toReturn = JSON.parse(cached);
+                callback(null, toReturn);
+            } else {
+                //either err or no data
+                var body = {
+                    type: 'intelligence',
+                    data: intelResult,
+                    //QH: specific workaround for preview
+                    touchpointId: dexit.scp.device.config.getTouchpoint()
+                    //touchpointId:dexit.device.sdk.getTouchpoint().touchpoint,
+                };
+                var resource = '/resolve-pres',
+                    headers = {Accept: 'application/json'},
+                    query = {},
+                    numRetries = 0,
+                    maxRetries = 2,
+                    url_base = dexit.bccProxyUrl + '/bcc';
+                this.dexRequestUtil.XHRRequestWithRetry(url_base, 'POST', resource, headers, query, body, numRetries, maxRetries, (err2, dat) => {
+                    if (err2 || !dat) {
+                        console.log('problem retrieving dynamic intelligence or no dynamic intelligence exists for parameters');
+                        callback(err2);
+                    } else {
+                        AsyncStorage.setItem(key, JSON.stringify(dat), (err3) => {
+                            if (err3) {
+                                console.log('could not save dynamic presentation in cache');
+                            }
+                        });
+                        callback(null, dat);
+                    }
+                })
+            }
+        });
+    };
+
+
+
     this._resolveIntelligencePresentation = function(isDynamic, dynamicEpt, data, intelResult, callback) {
         //TODO: generalize for any intelligence (this is only for intelligence for EPs)
 
@@ -11749,6 +11865,44 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                 }
 
             });
+
+        }else if (presentationRef === 'executable') {
+
+            var element = data;
+            var epElem = {epId: intelResult.epId};
+            data.intelligence = epElem;
+
+            var scId = (data.currentElement && data.currentElement.value && data.currentElement.value.scId ? data.currentElement.value.scId : '')
+
+            //
+            // self.stateStorage.init(data.epId,scId,self.deviceId,self.channelId,dexit.device.sdk.getUser(),dexit.scp.device.config.getTouchpoint(),data.instanceTime);
+            // var params = (data && data.previousElement && data.previousElement.id ? {previousElementId: data.previousElement.id} : {});
+            //
+            // self.stateStorage.setElementStateInfo(data.currentElement,'click',_.extend(params,data.intelligence));
+            // //self.stateStorage.setElementStateInfo(data.currentElement,'suspend');
+            //
+            // //call suspend
+            // self.suspend(data.epId,data.currentElement.id);
+            //
+            //
+             debugger;
+            PubSub.publish('dexit.ep.show',{ element:element, scId: scId});
+            callback(null, {skip:true});
+           // // var this = this;
+           //
+           //
+           //  dexit.device.sdk.getExecutionManager().stateStorage.init(data.epId,scId,this.deviceId,this.channelId,dexit.device.sdk.getUser(),dexit.scp.device.config.getTouchpoint(),data.instanceTime);
+           //  var params = (data && data.previousElement && data.previousElement.id ? {previousElementId: data.previousElement.id} : {});
+           //
+           //  this.stateStorage.setElementStateInfo(data.currentElement,'click',_.extend(params,data.intelligence));
+           //  //this.stateStorage.setElementStateInfo(data.currentElement,'suspend');
+           //
+           //  //call suspend
+           //  this.suspend(data.epId,data.currentElement.id);
+           //
+           //  this.pubSub.publish('dexit.ep.go', dat);
+           //
+
 
 
         } else if (dynamicEpt) {
@@ -11820,13 +11974,34 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                         ' </div>',
                     name: name
                 };
+                callback(null, presentation);
             }else {
-                var presentation = {
+
+                var defaultPresentation = {
                     html: //'<div role="button">' +
                         '<span class="">' + name + '</span>', //+
                     //' </div>',
                     name: name
                 };
+
+                 if (intelResult.epId) {
+                    //attempt to look-up icon
+
+                    this._resolveEPPresentation(intelResult, function(err, result) {
+                        if (err) {
+                            return callback(null, defaultPresentation);
+                        }
+                        callback(null, result.presentation);
+                    });
+                    // /resolve-pres'
+
+                }else {
+
+                    callback(null, defaultPresentation);
+
+                }
+
+
             }
 
 
@@ -11838,7 +12013,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
             //     ' </div>',
             //     name: name
             // };
-            callback(null, presentation);
+            //callback(null, presentation);
         }
     };
 
@@ -11846,18 +12021,16 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
         var args = {};
         if (data.currentElement.value.typeId && data.currentElement.value.typeId.indexOf('{{ept.dynamic') !== -1 ) {
 
-            var previous = (data.previousElement && data.previousElement.value ? data.previousElement : {});
-            var eptType = (data.previousElement && data.previousElement.value.type ? data.previousElement.value.type: '');
+            var previous = (data.previousElement && data.previousElement.value ? data.previousElement.value : {} );
+            var eptType = (previous && previous.type ? previous.type: '');
             if (eptType === 'behaviour') {
-
+                var sc = dexit.scp.device.management.scmanager.smartcontent.object[previous.scId];
+                var behaviour = sc.behaviour[data.previousElement.value.typeId];
                 try {
-                    var sc = dexit.scp.device.management.scmanager.smartcontent.object[data.previousElement.value.scId];
-                    var behaviour = sc.behaviour[data.previousElement.value.typeId];
-
                     var parsed = JSON.parse(behaviour.property.ds);
                     previous.eptId = parsed.id;
                 }catch(e) {
-                    console.log('error trying to parse previous behaviour');
+
                 }
 
             }
@@ -12399,7 +12572,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                     }
 
                     _.extend(toShow,refs);
-              //      alert('show content');
+                    self.plugin.setDeviceId(dexit.scp.device.resolution.touchpoint.deviceId);
                     self.plugin.show(toShow, cb);
                 }]
             }, function (err) {
