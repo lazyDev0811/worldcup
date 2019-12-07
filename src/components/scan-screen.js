@@ -16,6 +16,7 @@ import {RNCamera as Camera} from 'react-native-camera';
 //import Web from "./Web";
 
 let passThroughData = {};
+let parentRef = null;
 
 class ScanScreen extends Component {
   componentDidMount(): void {
@@ -24,6 +25,7 @@ class ScanScreen extends Component {
     // refresh_Token = this.props.navigation.state.params.refreshToken;
     //
     passThroughData = this.props.navigation.state.params.data;
+    parentRef = this.props.navigation.state.params.selfRef;
 
 
   }
@@ -42,7 +44,7 @@ class ScanScreen extends Component {
      * e.rawData (raw encoding)
      */
 
-    this.props.navigation.state.params.onCodeCapture(e.data, passThroughData);
+    this.props.navigation.state.params.onCodeCapture(e.data, passThroughData, parentRef);
 
     //this.props.on
     // this.props.onlogoutPress();

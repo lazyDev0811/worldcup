@@ -1,8 +1,20 @@
 import React from 'reactn';
-import {View, StyleSheet, Platform, Text, AppState, ActivityIndicator} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Platform,
+  Text,
+  AppState,
+  ActivityIndicator,
+} from 'react-native';
 import {WebView} from 'react-native-webview';
 import PubSub from 'pubsub-js';
-import {configIOS, configAndriod, configShared, resetNavigation} from '../utils/Helper';
+import {
+  configIOS,
+  configAndriod,
+  configShared,
+  resetNavigation,
+} from '../utils/Helper';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
 import async from 'async';
@@ -10,13 +22,12 @@ import {dexit} from '../assets/sdk/dex-sdk-shim';
 import uuid from 'uuid';
 import DeviceInfo from 'react-native-device-info';
 import ScanScreen from './scan-screen.js';
-import { withNavigation } from 'react-navigation';
+import {withNavigation} from 'react-navigation';
 
 var selfWeb;
 
 // import { createStackNavigator } from 'react-navigation-stack';
 import {NavigationActions, StackActions} from 'react-navigation';
-
 
 //const hasWebAccell = () => DeviceInfo.getApiLevel() !== 28;
 
@@ -36,7 +47,6 @@ let accessToken = '';
 const html = require('./ep-home')();
 
 class Web extends React.Component {
-
   constructor(props) {
     super(props);
     this.webview = React.createRef();
@@ -98,11 +108,9 @@ class Web extends React.Component {
     this.uuidsToCb = {};
     selfWeb = this;
 
-
     this.bccLib = {
       uuidsToCb: {},
       onMessage: function(str, selfRef) {
-
         try {
           var obj = JSON.parse(str);
           //next get the id
@@ -139,11 +147,10 @@ class Web extends React.Component {
                 if (data.element.intelligence.epId == '111114') {
                   selfWeb.logoutPress();
                 } else if (data.element.intelligence.epId == '111110') {
-
                   debugger;
                   selfRef.openCamera(data);
 
-                 // selfWeb.openCamera();
+                  // selfWeb.openCamera();
 
                   debugger;
                 }
@@ -151,6 +158,37 @@ class Web extends React.Component {
               } else {
                 selfWeb.dexit.PubSub.publish('dexit.ep.show', data);
               }
+            } else if (obj.op && obj.op === 'dexit.ep.executeBehaviour') {
+              //data: { ref:string, scId: scId, behaviourId: behaviourId, args: {args: args, inputs:inputs} } };
+              var data = obj.data;
+              var sc =
+                dexit.scp.device.management.scmanager.smartcontent.object[
+                  data.scId
+                ];
+              var behaviour = sc.behaviour[data.behaviourId];
+              var executeArgs = data.args;
+              var responseId = data.ref;
+              debugger;
+              behaviour.executeWithParams(
+                executeArgs.args,
+                executeArgs.inputs,
+                (err, resp) => {
+
+                  selfWeb.bccLib.sendBehaviourResponse(responseId, err, resp);
+                },
+              );
+            } else if (obj.op && obj.op === 'dexit.localfn') {
+              var data = obj.data;
+              //todo: lookup table
+              var localName = data.value;
+              var args = data.args;
+              var callbackRef = data.callbackRef;
+
+              var dat = {
+                callbackRef: callbackRef,
+                callbackType: 'postMessage',
+              };
+              selfWeb[localName](dat);
             } else {
               console.warn('unknown message:' + str);
             }
@@ -168,6 +206,38 @@ class Web extends React.Component {
             true;`;
         selfWeb.sendMessage(run);
       },
+
+
+      sendBehaviourResponse: function(id, err, data) {
+        let obj = {
+          error: err,
+          data: data
+        };
+        let objStr = JSON.stringify(obj);
+        const run = `setTimeout(function() {
+              let objStr = '${objStr}';
+              let id = '${id}';
+              try { 
+                let obj = JSON.parse(objStr);
+                bccLib.handleBehaviourResponse(id, obj);
+              }catch(e){}
+            }, 10);
+            true;`;
+        selfWeb.sendMessage(run);
+      },
+
+      setDeviceId: function(id) {
+        const run = `
+            setTimeout(function() {
+              let id = '${id}';
+              try { 
+                bccLib.setDeviceId(id);
+              }catch(e){}
+            }, 10);
+            true;`;
+        selfWeb.sendMessage(run);
+      },
+
       setUser: function(obj) {
         let objStr = JSON.stringify(obj);
         const run = `
@@ -183,9 +253,11 @@ class Web extends React.Component {
       },
       setErrorStatus: function(err) {
         debugger;
+
+        var errStr = err.message;
         const run = `
             setTimeout(() => {
-              bccLib.setErrorStatus(${err});
+              bccLib.setErrorStatus(${errStr});
             }, 100);
             true;`;
         selfWeb.sendMessage(run);
@@ -217,7 +289,6 @@ class Web extends React.Component {
         }
       },
       prepareMasterContainer: function(layoutId, container, layoutHtml) {
-
         const layoutHtml2 = layoutHtml.replace(/\r?\n|\r/g, '');
 
         const run = `
@@ -235,14 +306,10 @@ class Web extends React.Component {
     };
   }
 
-
-
   // componentDidMount() {
   //   this._prepare();
   // }
   componentDidMount() {
-
-
     debugger;
 
     if (this.state.loaded) {
@@ -252,32 +319,32 @@ class Web extends React.Component {
     this._prepare()
       .then(loaded => {
         console.log('loading');
-      // alert('loaded');
-      //this._asyncLoad = null;
-      //this.setState({loaded: true});
-    }).catch((e)=> {
-      console.log(e);
-      debugger;
-      alert('problem loading...please reload app');
-    });
+        // alert('loaded');
+        //this._asyncLoad = null;
+        //this.setState({loaded: true});
+      })
+      .catch(e => {
+        console.log(e);
+        debugger;
+        alert('problem loading...please reload app');
+      });
     AppState.addEventListener('change', () => this._handleAppStateChange);
   }
 
-    componentWillUnmount() {
-      AppState.removeEventListener('change', () => this._handleAppStateChange);
+  componentWillUnmount() {
+    AppState.removeEventListener('change', () => this._handleAppStateChange);
+  }
+  _handleAppStateChange(nextAppState) {
+    debugger;
+    if (
+      this.state.appState.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      let key = this.state.key;
+      this.setState({key: key + 1});
     }
-    _handleAppStateChange(nextAppState) {
-      debugger;
-      if (
-          this.state.appState.match(/inactive|background/) &&
-          nextAppState === 'active'
-      ) {
-        let key = this.state.key;
-        this.setState({key: key + 1});
-      }
-      this.setState({appState: nextAppState});
-    }
-
+    this.setState({appState: nextAppState});
+  }
 
   // componentWillMount() {
   //   this._asyncLoad = this._prepare().then(loaded => {
@@ -291,22 +358,20 @@ class Web extends React.Component {
   //   }
   // }
 
-
-  openCamera = (data) => {
-
+  openCamera = data => {
     debugger;
     const {navigation} = this.props;
 
+
     const navigateAction = NavigationActions.navigate({
       routeName: 'QRScreen',
-      params: {onCodeCapture: this.onCodeCapture, data: data },
-     // action: NavigationActions.navigate({ routeName: 'ScanScreen' }),
+      params: {onCodeCapture: this.onCodeCapture, data: data, selfRef: selfWeb},
+      // action: NavigationActions.navigate({ routeName: 'ScanScreen' }),
     });
     navigation.navigate(navigateAction);
 
     this.setState({showCamera: true});
-  }
-
+  };
 
   _prepare = async () => {
     //accessToken = this.props.navigation.state.params.accessToken;
@@ -322,8 +387,10 @@ class Web extends React.Component {
         //decode the token
 
         let decoded = jwtDecode(accessToken);
+
+        //email: 'jake.vauden@dexit.co', //'//decoded.email || 'jake.vauden@dexit.co',
         this.setState({
-          email: 'jake.vauden@dexit.co', //'//decoded.email || 'jake.vauden@dexit.co',
+          email: decoded.email,
         });
       }
     } catch (err) {
@@ -488,9 +555,8 @@ class Web extends React.Component {
     }
     // args.ice4mBCs = '';
 
-
     this.args = args;
-   // this.setState({args: args});
+    // this.setState({args: args});
     //this.args = args;
     //this.user = args.user;
     this.init();
@@ -519,7 +585,7 @@ class Web extends React.Component {
       return await result.json();
       //return a;
     } else {
-      throw new Error('unrecognized response content type')
+      throw new Error('unrecognized response content type');
     }
   }
 
@@ -598,7 +664,6 @@ class Web extends React.Component {
     return expireTime;
   }
 
-
   async loadEPCached(token, tpId, expireInMinutes = 60) {
     //debugger;
     let url =
@@ -611,17 +676,16 @@ class Web extends React.Component {
     let resp = null;
     debugger;
     try {
-      resp = (JSON.parse(value));
-    }catch(e) {
+      resp = JSON.parse(value);
+    } catch (e) {
       resp = null;
     }
 
-
     // there is data in cache && cache is expired
     if (
-        resp !== null &&
-        resp.data &&
-        resp['expireAt'] &&
+      resp !== null &&
+      resp.data &&
+      resp.expireAt &&
       new Date(resp.expireAt) < new Date()
     ) {
       //clear cache
@@ -670,7 +734,7 @@ class Web extends React.Component {
 
   hideLoadingIndicator() {
     // if (!this.state.loaded) {
-      this.setState({loaded: true});
+    this.setState({loaded: true});
     // }
   }
   loadPortal(tpId, bcType, callback) {
@@ -684,10 +748,7 @@ class Web extends React.Component {
     this.bccLib.setUser({id: self.state.user.id, name: self.state.user.name});
 
     //this.getData(
-    this.loadEPCached(
-      this.state.token,
-      tpId,
-    )
+    this.loadEPCached(this.state.token, tpId)
       .then(ep => {
         // eslint-disable-next-line no-debugger
 
@@ -710,6 +771,9 @@ class Web extends React.Component {
         } else {
           self.bcloaded = true;
           debugger;
+
+          //ep = '234707';
+
           self._showSubscriberEP(ep, this.refEp);
           callback();
         }
@@ -724,7 +788,7 @@ class Web extends React.Component {
 
   initializeSDK(channelUrl, callback) {
     let self = this;
-    let args = self.args;//{...this.state.args};
+    let args = self.args; //{...this.state.args};
     /* set config */
     if (!args.sdkRequiredServices) {
       return callback(new Error('missing configuration. Cannot load sdk'));
@@ -803,6 +867,7 @@ class Web extends React.Component {
     //     }
     //     console.log('done');
     // });
+
 
     let epToUse = refEp || epId;
     dexit.device.sdk.loadEngagementPattern(epToUse, null, function(err) {
@@ -917,9 +982,26 @@ class Web extends React.Component {
     }
   }
 
-  onCodeCapture(data, passThroughData) {
+  onCodeCapture(data, passThroughData, selfRef) {
     //pass in the data
-    alert('QR data:' + data);
+    //alert('QR data:' + data);
+    debugger;
+    if (passThroughData && passThroughData.callbackRef) {
+      if (data && _.isString(data)) {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {}
+      }
+      selfRef.bccLib.sendBehaviourResponse(
+        passThroughData.callbackRef,
+        null,
+        data,
+      );
+    }
+
+    console.log(data);
+
+
     debugger;
 
     //TODO: use passThroughData to decide next action
@@ -929,17 +1011,17 @@ class Web extends React.Component {
     let self = this;
 
     if (!self.webview.current) {
-    // if (!this.webref) {
-        debugger;
-     // alert('no webRef');
+      // if (!this.webref) {
+      debugger;
+      // alert('no webRef');
 
       //enforce wait
-      setTimeout(function(){
+      setTimeout(function() {
         self.sendMessage(data);
       }, 200);
     } else {
       //setTimeout(function() {
-        self.webview.current.injectJavaScript(data);
+      self.webview.current.injectJavaScript(data);
       //}, 100);
     }
   }
@@ -950,11 +1032,10 @@ class Web extends React.Component {
 
   logoutPress = () => {
     this.props.onlogoutPress();
-  }
-
+  };
 
   render() {
-   // debugger;
+    // debugger;
     // const run = `
     //       document.body.style.backgroundColor = 'blue';
     //       true;
@@ -975,7 +1056,7 @@ class Web extends React.Component {
     //   }, 3000);
     // }, 3000);
 
-   // var html = require('./ep-home');
+    // var html = require('./ep-home');
 
     // if (!this.state.loaded || this.state.viewState === 'LOADING') {
     //   // return (
@@ -992,53 +1073,53 @@ class Web extends React.Component {
     //       />
     //   );
     // } else {
-      //var html = this.props.html; //this.props  require('./ep-home');
-      return (
-
-        <View style={{flex: 1}}>
-
-
-          <WebView
-            originWhitelist={['*']}
-            //ref={r => (this.webref = r)}
-            ref={this.webview}
-            // source={{html: '<div id="merch-container">Hello there</div>'}}
-            // source={{html: require('./ep-home')()}}
-            onLoadStart={() => {
-              this.showLoadingIndicator();
-              this.setState({viewState: 'LOADING'});
-              //this.webview.current.setState({viewState: 'LOADING'});
-            }}
-            mediaPlaybackRequiresUserAction={false}
-            source={{html: html}}
-            onLoadEnd={() => {
-              //debugger;
-              this.setState({viewState: 'LOADED'});
-            }}
-            onError={err => this.logError(err)}
-            onMessage={event => {
-              this.handleMessage(event);
-            }}
-            allowFileAccess={true}
-            allowFileAccessFromFileURLs={true}
-            key={this.state.key}
-            //renderLoading={this.ActivityIndicatorLoadingView}
-            //startInLoadingState
+    //var html = this.props.html; //this.props  require('./ep-home');
+    return (
+      <View style={{flex: 1}}>
+        <WebView
+          originWhitelist={['*']}
+          //ref={r => (this.webref = r)}
+          ref={this.webview}
+          // source={{html: '<div id="merch-container">Hello there</div>'}}
+          // source={{html: require('./ep-home')()}}
+          onLoadStart={() => {
+            this.showLoadingIndicator();
+            this.setState({viewState: 'LOADING'});
+            //this.webview.current.setState({viewState: 'LOADING'});
+          }}
+          mediaPlaybackRequiresUserAction={false}
+          source={{html: html}}
+          onLoadEnd={() => {
+            //debugger;
+            this.setState({viewState: 'LOADED'});
+          }}
+          onError={err => this.logError(err)}
+          onMessage={event => {
+            this.handleMessage(event);
+          }}
+          allowFileAccess={true}
+          allowFileAccessFromFileURLs={true}
+          key={this.state.key}
+          cacheMode={'LOAD_CACHE_ELSE_NETWORK'}
+          injectedJavaScript={`
+          $('body').scrollTop({0});`}
+          //renderLoading={this.ActivityIndicatorLoadingView}
+          //startInLoadingState
+        />
+        {!this.state.loaded && (
+          <ActivityIndicator
+            color="#009688"
+            size="large"
+            style={styles.ActivityIndicatorStyle}
           />
-          {!this.state.loaded &&
-              <ActivityIndicator
-                  color='#009688'
-                  size='large'
-                  style={styles.ActivityIndicatorStyle}
-              />}
+        )}
 
-          {/*{!this.state.showCamera &&*/}
-          {/*<View style={styles.CameraViewIndicator}>*/}
-          {/*  <ScanScreen style={{flex: 1}} onCodeCapture={this.onCodeCapture} />*/}
-          {/*</View>}*/}
-
-        </View>
-      );
+        {/*{!this.state.showCamera &&*/}
+        {/*<View style={styles.CameraViewIndicator}>*/}
+        {/*  <ScanScreen style={{flex: 1}} onCodeCapture={this.onCodeCapture} />*/}
+        {/*</View>}*/}
+      </View>
+    );
   }
 }
 

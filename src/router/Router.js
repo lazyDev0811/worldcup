@@ -1,8 +1,8 @@
 import { createStackNavigator } from 'react-navigation';
 
 //import screens
-import LoginScreen from '../components/LoginScreenAuto';
-//import LoginScreen from '../components/LoginScreen';
+// import LoginScreen from '../components/LoginScreenAuto';
+import LoginScreen from '../components/LoginScreen';
 import ScanScreen from '../components/scan-screen';
 
 import SplashScreen from '../components/SplashScreen';

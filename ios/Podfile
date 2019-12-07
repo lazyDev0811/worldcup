@@ -27,11 +27,10 @@ target 'AuthDemo' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
-  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
-  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+
+  pod 'RCTRestart', :path => '../node_modules/react-native-restart/ios'
 
   target 'AuthDemoTests' do
     inherit! :search_paths
@@ -39,6 +38,7 @@ target 'AuthDemo' do
   end
 
   use_native_modules!
+  platform :ios, '9.0'
 end
 
 target 'AuthDemo-tvOS' do
