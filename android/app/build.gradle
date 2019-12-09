@@ -132,8 +132,8 @@ android {
         applicationId "com.authdemo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 36
-        versionName "0.5.6"
+        versionCode 39
+        versionName "0.5.10"
         manifestPlaceholders = [
             appAuthRedirectScheme: 'com.authdemo'
             //appAuthRedirectScheme: 'https://sso-latest.dexit.co/auth/realms/dexit.co/'
@@ -154,17 +154,17 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        releaseSigningConfig {
-            //if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-//                 storeFile file(MYAPP_UPLOAD_STORE_FILE)
-//                 storePassword MYAPP_UPLOAD_STORE_PASSWORD
-//                 akeyAlias MYAPP_UPLOAD_KEY_ALIAS
-//                 keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-            //}
-            storeFile rootProject.file("app/release-key.keystore")
-            storePassword System.getProperty("APPCENTER_KEYSTORE_PASSWORD")
-            keyAlias System.getProperty("APPCENTER_KEY_ALIAS")
-            keyPassword System.getProperty("APPCENTER_KEY_PASSWORD")
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+//             storeFile rootProject.file("app/release-key.keystore")
+//             storePassword System.getProperty("APPCENTER_KEYSTORE_PASSWORD")
+//             keyAlias System.getProperty("APPCENTER_KEY_ALIAS")
+//             keyPassword System.getProperty("APPCENTER_KEY_PASSWORD")
 
 
         }
@@ -177,7 +177,7 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
             //signingConfig signingConfigs.debug
-            signingConfig signingConfigs.releaseSigningConfig
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

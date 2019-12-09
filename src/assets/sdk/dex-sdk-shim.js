@@ -9376,7 +9376,12 @@ dexit.EPParser.prototype.parse = function(engagementPattern) {
 
         if (name === 'start') { //for connection 'start'
             //create edge
-            g.createNewEdge('start',to, createPropertiesForConnection(type,properties));
+            if (doubleDecisionNodes.indexOf(to) !== -1) {
+                g.createNewEdge('start', to + trueAppend, createPropertiesForConnection(type, properties));
+                g.createNewEdge('start', to + falseAppend, createPropertiesForConnection(type, properties));
+            }else {
+                g.createNewEdge('start', to, createPropertiesForConnection(type, properties));
+            }
         } else { //for all other connections
             //add edge
 
@@ -11834,7 +11839,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
 
         if (presentationRef === 'embedded') {
 
-
+            debugger;
 
             //make current EP layout the parent layout, pass in containerRef
             //in parser make sure to set container to an expression with:
@@ -11849,12 +11854,18 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
 
 
                 //set layout relative to the container for the current layout and inside of the region
-                var overrideContainer = container + ' div[data-region="' + data.regionRef + '"]';
+                var overrideContainer = container + ' [data-region="' + data.regionRef + '"]';
+
+
 
                 if (intelResult.epId) {//then need to load EP
                     var epId = (intelResult.revision ? intelResult.epId + '-' + intelResult.revision : intelResult.epId);
-                    dexit.device.sdk.loadEngagementPattern(epId, overrideContainer, function (err) {
-                        callback(null, {skip: true});
+                    //embedded patterns may not unload...remove them manually
+                    var epIdString = (intelResult.epId.indexOf('-') === -1 ? intelResult.epId : intelResult.epId.split('-')[0] );
+                    dexit.device.sdk.unloadEngagementPattern(epIdString, function(err) {
+                        dexit.device.sdk.loadEngagementPattern(epId, overrideContainer, function (err) {
+                            callback(null, {skip: true});
+                        });
                     });
                 } else { //passed in data is an ep
                     var toPass = intelResult;
@@ -11863,6 +11874,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                         callback(null, {skip: true});
                     });
                 }
+
 
             });
 
@@ -12099,6 +12111,22 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
             });
 
 
+        }else {
+            var resource ='/resolve',
+                headers = { Accept : 'application/json'},
+                query ={},
+                numRetries = 0,
+                maxRetries= 2,
+                url_base = dexit.bccProxyUrl + '/bcc';
+            this.dexRequestUtil.XHRRequestWithRetry(url_base,'POST', resource, headers, query, body, numRetries, maxRetries, (err2, data) => {
+                //if err is a 404 then there is not match...for now skip caching
+                if (err2 || !data) {
+                    console.log('problem retrieving dynamic intelligence or no dynamic intelligence exists for parameters');
+                    callback(err);
+                } else {
+                    callback(null, data);
+                }
+            });
         }
 
 

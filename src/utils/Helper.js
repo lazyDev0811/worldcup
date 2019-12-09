@@ -89,3 +89,23 @@ export function checkTokenValid(accessToken) {
         return false;
     }
 }
+
+// export async function retrieveLayouts(accessToken, config) {
+//
+//
+//     const url = config.layoutConfUrl;
+//
+//     return fetch(
+//         url,
+//         {
+//             method: 'GET',
+//             headers: {
+//                 'Accept': 'application/json',
+//             },
+//
+//         },
+//     );
+// }
+
+
+

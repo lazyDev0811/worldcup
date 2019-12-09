@@ -96,7 +96,7 @@ class HomeScreen extends Component {
     const {navigation} = this.props;
 
     //await this.revokeLogin(access_Token);
-//    await this.revokeLogin(refresh_Token);
+    await this.revokeLogin(refresh_Token);
 
     AsyncStorage.setItem('accessToken', '');
     AsyncStorage.setItem('refreshToken', '');
