@@ -1020,6 +1020,7 @@ class Web extends React.Component {
         self.sendMessage(data);
       }, 200);
     } else {
+      debugger;
       //setTimeout(function() {
       self.webview.current.injectJavaScript(data);
       //}, 100);
@@ -1088,6 +1089,8 @@ class Web extends React.Component {
             //this.webview.current.setState({viewState: 'LOADING'});
           }}
           mediaPlaybackRequiresUserAction={false}
+          allowsInlineMediaPlayback={true} //for ios
+          bounces={false} //for ios
           source={{html: html}}
           onLoadEnd={() => {
             //debugger;
