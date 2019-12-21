@@ -1020,7 +1020,7 @@ class Web extends React.Component {
         self.sendMessage(data);
       }, 200);
     } else {
-      debugger;
+
       //setTimeout(function() {
       self.webview.current.injectJavaScript(data);
       //}, 100);

@@ -179,27 +179,23 @@ module.exports = function() {
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.3/async.min.js"></script>
     
-    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.1/bcc-main-multi-layout-post-message-bypass.js"></script>
+    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.2/bcc-main-multi-layout-post-message-bypass.js"></script>
     
 <!--    <script src="https://3pa.cdnedge.bluemix.net/ajax/libs/video.js/6.3.3/video.js"></script>-->
 <!--    <script src="https://releases.dexit.co/bcc-presentation-react/main.js"></script>-->
      
-     <script type="application/javascript">
-        $( document ).ready(function() {
-        
-            // if (window && window.bccLib) {
-            //     $('.status').append('<h1>bccLib loaded</h1>')
-            // } else {
-            //      $('.status').append('<h1>bccLib not loaded</h1>')
-            // }
-                
-            
-        })
-        
-        
-        
-        
-    </script>
+<!--     <script type="application/javascript">-->
+<!--        $( document ).ready(function() {-->
+<!--        -->
+<!--            // if (window && window.bccLib) {-->
+<!--            //     $('.status').append('<h1>bccLib loaded</h1>')-->
+<!--            // } else {-->
+<!--            //      $('.status').append('<h1>bccLib not loaded</h1>')-->
+<!--            // }-->
+<!--                -->
+<!--            -->
+<!--        })      -->
+<!--    </script>-->
     
 </body>
 
