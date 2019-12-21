@@ -8,6 +8,150 @@
 
 const SKIP_VALIDATION = true;
 
+var defaultFormArrayTemplate  = '<div id="<%= id %>"><ul class="_jsonform-array-ul" style="list-style-type:none;"><%= children %></ul><span class="_jsonform-array-buttons"><a href="#" class="btn btn-default _jsonform-array-addmore"><i class="glyphicon glyphicon-plus-sign" title="Add new"></i></a> <a href="#" class="btn btn-default _jsonform-array-deletelast"><i class="glyphicon glyphicon-minus-sign" title="Delete last"></i></a></span></div>';
+
+var topupFormArrayTemplate = `<div id="<%= id %>"><ul class="_jsonform-array-ul" style="list-style-type:none;"><%= children %></ul>
+     <span class="_jsonform-array-buttons">
+         <a href="#" class="btn btn-secondary _jsonform-array-addmore">Add Another Number
+             </a>
+              &nbsp;
+             <a href="#" class="btn btn-secondary _jsonform-array-deletelast">Remove Last Number</a></span></div>`;
+
+
+JSONForm.fieldTypes['transactionTitle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['text']);
+JSONForm.fieldTypes['transactionTitle'].template = `<div class="heading-wrraper margin-bottom-10">
+                <div class="top-heading">
+                    <h3 type="text">Transaction #<%= value %></h3>
+                </div>
+            </div>`;
+
+JSONForm.fieldTypes['title'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+JSONForm.fieldTypes['title'].template = `<div class="heading-wrraper margin-bottom-10">
+                <div class="top-heading">
+                    <h3><%= elt.helpvalue %></h3>
+                </div>
+            </div>`;
+
+var totalAmountTimer = null;
+
+JSONForm.fieldTypes['totalAmount'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+
+JSONForm.fieldTypes['totalAmount'].template =`<div id="<%= id %>" class="total-wraper margin-bottom-10">
+            <span total-amount="amount" class="amunt"><%= value %></span>
+        </div>`;
+// template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
+JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
+  // Compute the value of "myvalue" here
+  if (totalAmountTimer) {
+    clearInterval(totalAmountTimer);
+  }
+  totalAmountTimer = setInterval(function() {
+    var sum = 0;
+    $('[name$="amount"]').each(function(){
+      sum += + $(this).val()
+    });
+    $('span[total-amount="amount"]').text(sum);
+
+  }, 1000);
+};
+
+JSONForm.fieldTypes['subTitle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['text']);
+
+JSONForm.fieldTypes['subTitle'].template = `<div class="voucher-subtitle">
+                <div class="top-heading">
+                    <h1><%= value %></h1>
+                </div>
+            </div>`;
+
+
+JSONForm.fieldTypes['textSection'] = jQuery.extend(true, {}, JSONForm.fieldTypes['text']);
+
+JSONForm.fieldTypes['textSection'].template = `<div class="voucher-wraper">
+                <p style="padding-top:20px"><%= value %></p></div>`;
+
+var balanceCheckTimer = null;
+
+var balanceCheckTimer = null;
+
+JSONForm.fieldTypes['balanceCheck'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+
+JSONForm.fieldTypes['balanceCheck'].template =`<div id="<%= id %>" balanceCheck="amount" style="display: none">
+            <div class="procceed-text"> <%= elt.helpvalue %></div>
+        </div>`;
+// template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
+JSONForm.fieldTypes['balanceCheck'].onInsert =function (data, node) {
+  // Compute the value of "myvalue" here
+  if (balanceCheckTimer) {
+    clearInterval(balanceCheckTimer);
+  }
+  balanceCheckTimer = setInterval(function() {
+    var total = $('[total-amount="amount"]').text();
+    var balance =$('[balance-amount="amount"]').text();
+
+    if (total && balance) {
+      var nBalance = parseFloat(balance);
+      var nTotal = parseFloat(total);
+      if (nBalance >= nTotal ) {
+        $('div[balanceCheck="amount"]').hide();
+        $('[type="submit"]').attr("disabled", false);
+      } else {
+        $('div[balanceCheck="amount"]').show();
+        $('[type="submit"]').attr("disabled", true);
+      }
+    }
+  }, 2000);
+};
+
+JSONForm.fieldTypes['balance'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+
+JSONForm.fieldTypes['balance'].template =`<div id="<%= id %>" class="total-wraper margin-bottom-35">
+            <span balance-amount="amount" class="amunt"><%= myvalue %></span>
+        </div>`;
+
+JSONForm.fieldTypes['balance'].onBeforeRender = function (data, node) {
+  // Compute the value of "myvalue" here
+  data.myvalue = data.elt.helpvalue;
+};
+
+var amountToggleTimer = null;
+JSONForm.fieldTypes['amountToggle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['selectfieldset']);
+
+JSONForm.fieldTypes['amountToggle'].onInsert =function (data, node) {
+  $(node.el).find('select.nav').first().on('change', function (evt) {
+    var $option = $(this).find('option:selected');
+    $(node.el).find('input[type="hidden"]').first().val($option.attr('value'));
+  });
+
+  // Compute the value of "myvalue" here
+  if (amountToggleTimer) {
+    clearInterval(amountToggleTimer);
+  }
+  amountToggleTimer= setInterval(function() {
+    var sum = 0;
+
+    debugger;
+    //send either field to the hidden amount field
+    var option =  $('input[name="topupmine[0].action"]').val();
+    if (option) {
+      var val = "";
+      if (option === 'Enter Top Up Amount') {
+        val = $('[name$="topupmine[0].amountManual"]').val();
+
+      }else {
+        val = $('[name$="topupmine[0].amountPredefined"]').val();
+      }
+
+      var lastVal = $('[name$="topupmine[0].amount"]').val();
+      if (lastVal !== val) {
+        $('[name$="topupmine[0].amount"]').val(val);
+      }
+    }
+  }, 2000);
+
+};
+
+
+
 /**
  * Compiles a string into a jsonata expression object
  * TODO: improve performance by caching expressions
@@ -43,6 +187,265 @@ async function sha256(message) {
     console.log(ctBase64);
     return ctBase64;
 }
+
+var mapFormFields = function(evt, form, previous) {
+    evt.preventDefault();
+    debugger;
+
+    var values = {};
+    var rowIdx = -1;
+
+    var schemaName = '';
+    $.each($(evt.target.parentNode).serializeArray(), function(i, field) {
+
+        var name = field.name.split('.')[1];
+        if (rowIdx < 0) {
+            rowIdx = field.name.substring(field.name.indexOf('[') + 1, field.name.indexOf(']'));
+            schemaName =field.name.substring(0,field.name.indexOf('['));
+        }
+        values[name] = field.value;
+        // console.log(name + " = " + field.value);
+    });
+
+
+
+    //return values;
+
+
+    var toReturn = values;
+    if (schemaName) {
+        toReturn = {};
+        toReturn[schemaName] = [values];
+    }
+    //QH
+    //evt.preventDefault();
+   // form.onSubmit(null, values)
+    form.ownerTree.formDesc.onSubmit(null,toReturn)
+};
+
+var tempData = {
+    "topupmine": [{
+        "user":"22653423043",
+        "amount":"",
+        "amountPredefined":"",
+        "pin":"12345"
+    }],
+    "transactions": [
+        {
+            "transactionId":"460",
+            "name":"Hart Yarrow",
+            "date":"Dec 20 2019 12:01",
+            "transactionType":"Payment",
+            "amount":"10.50"
+        },
+        {
+            "transactionId":"456",
+            "name":"Domenico Slixby",
+            "date":"Nov 22 2019 12:01",
+            "transactionType":"Payment",
+            "amount":"22.20"
+        },
+        {
+            "transactionId":"459",
+            "name":"John David",
+            "date":"Sept 29 2019 12:01",
+            "transactionType":"Payment",
+            "amount":"10.00"
+        },
+        {
+            "transactionId":"458",
+            "name":"Vlad Bow",
+            "date":"Sept 10 2019 12:01",
+            "transactionType":"Top Up",
+            "amount":"32.50"
+        },
+        {
+            "transactionId":"457",
+            "name":"Larry Kyle",
+            "date":"Aug 29 2019 12:01",
+            "transactionType":"Payment",
+            "amount":"15.50"
+        },
+        {
+            "transactionId":"456",
+            "name":"Kem Chris",
+            "date":"Jul 30 2019 12:01",
+            "transactionType":"Payment",
+            "amount":"23.50"
+        },
+        {
+        "transactionId":"123",
+        "name":"Tester S",
+        "date":"Jul 29 2019 12:01",
+        "transactionType":"Top Up",
+        "amount":"10.22"
+        }
+    ],
+    "vendors": [{
+        "vendorId":"1",
+        "name":"Vendor A",
+        "vouchers":[{
+            "vendorId":"1",
+            "voucher":"Cars",
+            "amount":22
+        },
+            {
+                "vendorId":"1",
+                "voucher":"Boats",
+                "amount":22
+            },
+            {
+                "vendorId":"1",
+                "voucher":"Planes",
+                "amount":22
+            },
+            {
+                "vendorId":"1",
+                "voucher":"Doors",
+                "amount":22
+            },
+            {
+                "vendorId":"1",
+                "voucher":"Scooters",
+                "amount":22
+            }
+        ]
+    },
+        {
+            "vendorId":"2",
+            "name":"Bart",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Gliders",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"cycles",
+                    "amount":22
+                }
+            ]
+        },
+        {
+            "vendorId":"3",
+            "name":"Cars",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Gliders",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"cycles",
+                    "amount":22
+                }
+            ]
+        },
+        {
+            "vendorId":"4",
+            "name":"Doors",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Gliders",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"cycles",
+                    "amount":22
+                }
+            ]
+        },
+        {
+            "vendorId":"5",
+            "name":"Enders",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Gliders",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"cycles",
+                    "amount":22
+                }
+            ]
+        },
+        {
+            "vendorId":"6",
+            "name":"Fargo",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Bikes",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"Scooters",
+                    "amount":22
+                }
+            ]
+        },
+        {
+            "vendorId":"7",
+            "name":"Ghost",
+            "vouchers":[
+                {
+                    "vendorId":"1",
+                    "voucher":"Gliders",
+                    "amount":22
+                },
+                {
+                    "vendorId":"1",
+                    "voucher":"cycles",
+                    "amount":22
+                }
+            ]
+        }
+    ],
+    "vouchers": [{
+        "vendorId":"1",
+        "voucher":"Cars",
+        "amount":22
+    },
+        {
+            "vendorId":"1",
+            "voucher":"Boats",
+            "amount":22
+        },
+        {
+            "vendorId":"1",
+            "voucher":"Planes",
+            "amount":22
+        },
+        {
+            "vendorId":"1",
+            "voucher":"Doors",
+            "amount":22
+        },
+        {
+            "vendorId":"1",
+            "voucher":"Scooters",
+            "amount":22
+        },
+        {
+            "vendorId":"1",
+            "voucher":"Gliders",
+            "amount":22
+        },
+        {
+            "vendorId":"1",
+            "voucher":"cycles",
+            "amount":22
+        }
+    ]
+};
+
 
 if (!dexit) {
   var dexit = {};
@@ -91,7 +494,7 @@ bccLib = (function() {
   function emptyContainers() {
     //remove all
     _.each(layoutcontainerMap, function(value, layoutId) {
-      var regionMap = value && value.regionMap ? value.regionMap : {};
+      var regionMap = (value && value.regionMap ?  value.regionMap : {});
       _.each(regionMap, function(value, key) {
         value.emptyContainer();
       });
@@ -807,6 +1210,12 @@ dexit.BccVM = function(params) {
         bccVM.showBehaviourInLocalEmbed(params, referenceId);
         break;
       }
+      case 'none': {
+        //bccLib.setBehaviourMessageMap('fixme',referenceId);
+        bccVM.showBehaviourNone(params, referenceId);
+        break;
+      }
+
     }
   };
 
@@ -821,7 +1230,32 @@ dexit.BccVM = function(params) {
   };
 
 
-  self.showBehaviourInLocalEmbed = function(params, referenceId) {
+  self.showBehaviourNone = function(params, referenceId) {
+
+        var fn = params.url.replace('local://','');
+
+        var parts = fn.split('.');
+        if (parts.length > 1) {
+            if (parts[0] === 'self') {
+                self[parts[1]](params);
+            }
+        }else {
+            window[fn](params);
+        }
+        // eval(fn,params);
+        // window[fn](params);
+
+
+        bccLib.fetchNextElement(referenceId);
+    }
+
+    self.clearCurrentRegion = function(params) {
+        var regionElement = self.getRegion(params.regionRef);
+        self.clearDiv(regionElement);
+    }
+
+
+    self.showBehaviourInLocalEmbed = function(params, referenceId) {
         var regionElement = self.getRegion(params.regionRef);
         debugger;
 
@@ -836,48 +1270,115 @@ dexit.BccVM = function(params) {
         regionElement.appendChild(form);
         regionElement.appendChild(alert);
 
-        //TODO:values
-
 
         var values = null; //todo
 
-        self._checkPreRun(params, form, referenceId, false, null, function(err, values) {
-          if (err) {
-            //todo, warn
-          }
-          self._bindBehaviour(params,form,referenceId,false,values);
+        self._checkPreRun(params, form, referenceId, false, null, function(err, values, isConfirm, submitThenConfirm) {
+            if (err) {
+                //todo, warn
+            }
+            debugger;
+            // submitThenConfirm = true;
+            self._bindBehaviour(params,form,referenceId,isConfirm,values, submitThenConfirm);
         });
-
     };
 
     self._checkPreRun = function(params, form, referenceId, isConfirm, values, cb) {
-      var serviceDetails = params.serviceDetails;
-      var presentationMapping = serviceDetails.presentationMapping;
-      if (_.isString(presentationMapping)) {
-        presentationMapping = JSON.parse(presentationMapping);
-      }
 
-      if (presentationMapping.preRun && presentationMapping.preRun.type && presentationMapping.preRun.type === 'localfn') {
-        var preRun = presentationMapping.preRun && presentationMapping.preRun;
-        var callbackRef = 'preRun_' + referenceId;
-        bccLib.setBehaviourMessageMap(callbackRef, cb);
+        var skipValidation = SKIP_VALIDATION;
 
-        var args = preRun.args || {};
-        var msg = {op: 'dexit.localfn',
-          hasError: (false),
-          data: { value: preRun.value, args: args, callbackRef: callbackRef } };
-        window.ReactNativeWebView.postMessage(JSON.stringify(msg));
-      } else {
-        cb(null, values);
-      }
+
+
+        var serviceDetails = params.serviceDetails;
+        var presentationMapping = serviceDetails.presentationMapping;
+        if (_.isString(presentationMapping)) {
+            presentationMapping = JSON.parse(presentationMapping);
+        }
+
+
+        var submitThenConfirm = (presentationMapping.submitThenConfirm ? true : false);
+
+        var inputModel = serviceDetails.inputModel;
+        if (_.isString(inputModel)) {
+            inputModel = JSON.parse(inputModel);
+        }
+
+        if (presentationMapping.preRun && presentationMapping.preRun.type && presentationMapping.preRun.type === 'autoSubmit') {
+            var preRun = presentationMapping.preRun && presentationMapping.preRun;
+
+
+            if (skipValidation) {
+                var name = inputModel.title;
+                if (tempData && tempData[name]) {
+
+                    var data = {};
+                    data[name] = tempData[name];
+
+                    return cb(null, data, true, submitThenConfirm)
+                } else {
+                    cb(null, values, true, submitThenConfirm);
+                }
+
+                //return some dummy data
+            } else {
+                //todo:  preRun.args
+                cb(null, values, null, submitThenConfirm);
+
+            }
+
+
+        }else if (presentationMapping.preRun && presentationMapping.preRun.type && presentationMapping.preRun.type === 'localfn') {
+            var preRun = presentationMapping.preRun && presentationMapping.preRun;
+            var callbackRef = 'preRun_' + referenceId;
+            bccLib.setBehaviourMessageMap(callbackRef, cb);
+
+            var args = preRun.args || {};
+            var msg = {op: 'dexit.localfn',
+                hasError: (false),
+                data: { value: preRun.value, args: args, callbackRef: callbackRef } };
+            window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+
+        } else {
+            cb(null, values, null,submitThenConfirm);
+        }
 
 
     };
 
     self._showBehaviourError = function(formElement, msg) {
         $(formElement).siblings('.alert').html(msg);
+    };
 
-    }
+    self._prepareFormDef = function(formDef) {
+        _.each(formDef, function(val) {
+            if (val && val.type && val.type === 'array') {
+                //go through items
+                _.each(val.items, function(itemVal) {
+                    if (itemVal.items) {
+                        _.each(itemVal.items, function (fieldsetVal) {
+                            if (fieldsetVal.type && fieldsetVal.type === 'button' && fieldsetVal.onClick && !_.isFunction(fieldsetVal.onClick) ){
+                                //lookup fn ref
+                                var lookupNames = fieldsetVal.onClick;
+
+                                if (_.isArray(lookupNames)) {
+                                    //TODO;
+                                }else {
+                                    debugger;
+                                    fieldsetVal.onClick = function(evt, form) {
+                                        window[lookupNames](evt,form, self);
+                                    }
+                                }
+
+                            }
+                        })
+                    }
+                })
+
+
+            }
+        })
+        return formDef;
+    };
 
     self._next = function(params, formElement, referenceId, values ) {
 
@@ -896,6 +1397,10 @@ dexit.BccVM = function(params) {
         }
 
         var resultScreen = (presentationMapping && presentationMapping.resultScreen ? true : false);
+
+        var autoComplete = (presentationMapping && presentationMapping.autoComplete ? true : false);
+
+
         if (!resultScreen) {
             bccLib.fetchNextElement(referenceId);
         }else {
@@ -909,7 +1414,17 @@ dexit.BccVM = function(params) {
             var fields = (presentationMapping.args && presentationMapping.args.fields ? presentationMapping.args.fields : {});
             //var formDef = (presentationMapping.args && presentationMapping.args.form ? presentationMapping.args.form : null);
 
-            var formDef = ["*",{"type":"submit","title":"Done","htmlClass":"pink-btn"}];
+
+            var defaultFormDef = ["*",{"type":"submit","title":"Done","htmlClass":"pink-btn"}];
+            var formDefDefault = (presentationMapping.args && presentationMapping.args.form ? presentationMapping.args.form : defaultFormDef);
+            var formDef = (presentationMapping.args && presentationMapping.args.formComplete ? presentationMapping.args.formComplete : formDefDefault);
+            /**
+             * Need to include any event handlers (by name)
+             */
+            var formDefMod = self._prepareFormDef(formDef);
+
+
+
 
             self.clearDiv(formElement);
 
@@ -918,8 +1433,8 @@ dexit.BccVM = function(params) {
             var formDefinition = {
                 schema: inputModel,
                 fields: fields,
-                form: formDef,
-                value: values || {},
+                form: formDefMod,
+                value: values || null,
                 onSubmit: function (errors, values) {
                     debugger;
                     //evt.preventDefault();
@@ -935,21 +1450,31 @@ dexit.BccVM = function(params) {
             $(formElement).jsonForm(formDefinition);
 
 
+            if (autoComplete) {
+                bccLib.fetchNextElement(referenceId);
+            }
             //show next
 
         }
 
     }
 
-    self._bindBehaviour= function(params, formElement, referenceId, isConfirm, values) {
+    self._bindBehaviour = function(params, formElement, referenceId, isConfirm, values, submitThenConfirm) {
+
 
         //var url = new URLSearchParams(location.search);
         //var skipValidation = url.has("bypass");
         var skipValidation = SKIP_VALIDATION;
 
         function handleResult(err, result) {
-            if (skipValidation) {
-                self._next(params,formElement,referenceId,values);
+
+            debugger;
+            if (submitThenConfirm) {
+
+                self._bindBehaviour(params,formElement,referenceId,true,result,false);
+            } else if (skipValidation) {
+                let val = result || values;
+                self._next(params,formElement,referenceId,val);
             }else {
 
 
@@ -989,8 +1514,15 @@ dexit.BccVM = function(params) {
             presentationMapping = JSON.parse(presentationMapping);
         }
         var fields = (presentationMapping.args && presentationMapping.args.fields ? presentationMapping.args.fields : {});
-        var formDef = (presentationMapping.args && presentationMapping.args.form ? presentationMapping.args.form : null);
+        // var formDef = (presentationMapping.args && presentationMapping.args.form ? presentationMapping.args.form : null);
         //var values =
+
+        var defaultFormDef = ["*",{"type":"submit","title":"Done","htmlClass":"pink-btn"}];
+        var formDef = (presentationMapping.args && presentationMapping.args.form ? presentationMapping.args.form : defaultFormDef);
+
+        var formInput = (presentationMapping.args && presentationMapping.args.formInput ? presentationMapping.args.formInput : null);
+        var formConfirm = (presentationMapping.args && presentationMapping.args.formConfirm ? presentationMapping.args.formConfirm : null);
+        var formComplete = (presentationMapping.args && presentationMapping.args.formComplete ? presentationMapping.args.formComplete: null);
 
         var confirmScreen = (presentationMapping && presentationMapping.confirmScreen ? true : false);
 
@@ -999,19 +1531,41 @@ dexit.BccVM = function(params) {
             confirmScreen = false;
             //copy inputModel and make read only
             // make sure to add readonly to all
+            var confirmModel = serviceDetails.confirmModel;
+            if (_.isString(confirmModel)) {
+                confirmModel = JSON.parse(confirmModel);
+            }
 
-            var inputModelConfirm = JSON.parse(JSON.stringify(inputModel));
+            var inputModelConfirm = {};
+            if (confirmModel) {
+                inputModelConfirm = confirmModel;
+            }else {
+                inputModelConfirm = JSON.parse(JSON.stringify(inputModel));
+            }
 
 
-            Object.keys(inputModelConfirm.properties).forEach(function(key) {
-                inputModelConfirm.properties[key].readOnly = true;
-            });
+
+            //var inputModelConfirm = JSON.parse(JSON.stringify(inputModel));
+
+
+            //if array skip
+            if (inputModelConfirm.properties) {
+
+                Object.keys(inputModelConfirm.properties).forEach(function(key) {
+                    inputModelConfirm.properties[key].readOnly = true;
+                });
+            }
 
             var formDefConfirm;
-            try{
+            if (formConfirm) {
+                formDefConfirm = formConfirm;
+            }else {
                 formDefConfirm = JSON.parse(JSON.stringify(formDef));
-            }catch(e){}
 
+            }
+            try{
+
+            }catch(e){}
             var cancelButton = {
                 "type": "button",
                 "title": "Cancel",
@@ -1029,7 +1583,9 @@ dexit.BccVM = function(params) {
 
                 formDefConfirm.splice(1,0, cancelButton);
             }else {
-                formDefConfirm.push(cancelButton);
+                if (!presentationMapping.hideCancel) {
+                    formDefConfirm.push(cancelButton);
+                }
 
             }
             //cancel goes back to previous form
@@ -1037,8 +1593,27 @@ dexit.BccVM = function(params) {
         }
 
 
-        var formMod = (formDefConfirm ? formDefConfirm : formDef);
+        /**
+         * Need to include any event handlers (by name)
+         */
+        debugger;
+
+
+
+
         var inModel = (inputModelConfirm ? inputModelConfirm: inputModel);
+
+
+        if (submitThenConfirm && formInput) {
+            formDef = formInput || formDef;
+        }
+
+        var formMod = (formDefConfirm ? formDefConfirm : formDef);
+
+        debugger;
+        formMod = self._prepareFormDef(formMod);
+
+
 
 
         //"form": [
@@ -1061,18 +1636,23 @@ dexit.BccVM = function(params) {
 
         self.clearDiv(formElement);
 
+        //All templates must exist here
+        if (presentationMapping.customTemplateName && presentationMapping.customTemplateType && JSONForm.fieldTypes[presentationMapping.customTemplateType]) {
+            JSONForm.fieldTypes[presentationMapping.customTemplateType].template = window[presentationMapping.customTemplateName];
+        }
+
 
         //$(regionElement).find('form').jsonForm({
         var formDefinition = {
             schema: inModel,
             fields: fields,
             form: formMod,
-            value: values || {},
+            value: values || null,
             onSubmit: function (errors, values) {
                 debugger;
                 //evt.preventDefault();
                 // presentation
-                if (confirmScreen) {
+                if (confirmScreen && !submitThenConfirm) {
 
                     self._bindBehaviour(params,formElement,referenceId,true,values);
 
@@ -1084,7 +1664,8 @@ dexit.BccVM = function(params) {
                     //     //TODO: show errors
                     // } else {
 
-                    self._executeBehaviour(params, values, referenceId, handleResult);
+
+                    self._executeBehaviour(params, values, referenceId, submitThenConfirm, handleResult);
 
 
                 }
@@ -1112,10 +1693,11 @@ dexit.BccVM = function(params) {
      * @param {string} params.behaviourRef.typeRef - 'behaviour'
      * @param {string} params.behaviourRef.typeId - behaviour identifier
      * @param values
+     * @param submitThenConfirm
      * @param referenceId
      * @private
      */
-    self._executeBehaviour = function(params, values, referenceId, callback) {
+  self._executeBehaviour = function(params, values, referenceId, submitThenConfirm, callback) {
         debugger;
 
       var skipValidation = SKIP_VALIDATION;
@@ -1127,7 +1709,7 @@ dexit.BccVM = function(params) {
 
         //now look at mapping an merge with args
         //params.serviceDetails.inputMapping
-        var mappingParams = params.serviceDetails.inputMapping;
+        var mappingParams = params.serviceDetails.inputMapping || {};
         if (_.isString(mappingParams)) {
             mappingParams = JSON.parse(mappingParams);
         }
@@ -1141,13 +1723,20 @@ dexit.BccVM = function(params) {
         _.extend(values, globalValues);
         debugger;
 
+
+        var presentationMapping = params.serviceDetails.presentationMapping;
+        if (_.isString(presentationMapping)) {
+            presentationMapping = JSON.parse(presentationMapping);
+        }
+        var localSave = (presentationMapping && presentationMapping.localSave ? true: false);
+
         //run any transform functions on values
 
 
         async.auto({
             //map any values using local functions
             preMap: function (cb) {
-                if (mappingParams.preTransform && mappingParams.preTransform.length > 0) {
+                if (mappingParams && mappingParams.preTransform && mappingParams.preTransform.length > 0) {
                     async.each(mappingParams.preTransform, function (val, done) {
                         let name = val.name;
                         let fnName= val.valueFn;
@@ -1174,8 +1763,9 @@ dexit.BccVM = function(params) {
                 }
             },
             map: ['preMap', function(results, cb) {
-                var expression = getMappingExpression(mappingParams);
-                var bindings = mappingParams.bindings || {};
+                if (!mappingParams || Object.keys(mappingParams).length < 1) {
+                    return cb();
+                }
                 var expression = getMappingExpression(mappingParams);
                 var bindings = mappingParams.bindings || {};
                 expression.evaluate(values,bindings, function (err, result) {
@@ -1193,24 +1783,44 @@ dexit.BccVM = function(params) {
                 });
             }],
             execute: ['map', function(results, cb) {
-                var scId = params.behaviourRef.scId;
-                var behaviourId = params.behaviourRef.typeId;
 
-                //var sc = dexit.scp.device.management.scmanager.smartcontent.object[scId];
-                //var behaviour = sc.behaviour[behaviourId];
+                if (localSave) {
+                    _.extend(dexit.device.localData, results.map);
+                    cb(null,dexit.device.localData)
+                } else {
 
-                //behaviour.executeWithParams(args, inputs, cb);
-                //add to callbackMap
               if (skipValidation) {
                 debugger;
-                cb(null, {});
+                if (submitThenConfirm) {
+                     self._loadMockData(params,values,cb);
 
 
-
-
+                            // var inputModel = params.serviceDetails.confirmModel;
+                            // if (_.isString(inputModel)) {
+                            //     inputModel = JSON.parse(inputModel);
+                            // }
+                            //
+                            // var name = inputModel.title;
+                            // if (tempData && tempData[name]) {
+                            //
+                            //     var data = {};
+                            //     data[name] = tempData[name];
+                            //
+                            //     cb(null, data)
+                            // }else {
+                            //     cb(null,{});
+                            // }
                 }else {
-                  var key = referenceId+'_execute';
-                  bccLib.setBehaviourMessageMap(key, cb);
+                    cb(null, results.preMap || {});
+                }
+                        // cb(null, {});
+            } else {
+
+              var scId = params.behaviourRef.scId;
+              var behaviourId = params.behaviourRef.typeId;
+
+              var key = referenceId+'_execute';
+              bccLib.setBehaviourMessageMap(key, cb);
 
 
                 var msg = {
@@ -1221,8 +1831,8 @@ dexit.BccVM = function(params) {
                   window.ReactNativeWebView.postMessage(JSON.stringify(msg));
 
                 }
-//                behaviour.executeWithParams(args, inputs, cb);
-            }]
+             }
+          }]
         }, function(err, result) {
 
 
@@ -1254,7 +1864,47 @@ dexit.BccVM = function(params) {
         // });
 
     };
+  self._loadMockData = function(params,values, cb) {
 
+
+        var inputModel = params.serviceDetails.confirmModel;
+        if (_.isString(inputModel)) {
+            inputModel = JSON.parse(inputModel);
+        }
+
+        debugger;
+        var name = inputModel.title;
+        var data = {};
+        var found;
+        if (tempData && tempData[name]) {
+            //data[name] = tempData[name];
+            found = tempData[name];
+        }
+        if (!found) {
+            return cb(null,{});
+        }
+
+
+        if (found && values && values.startDate && values.endDate) {
+
+
+            var startDate = moment(values.startDate);
+            var endDate = moment(values.endDate);
+
+            found = _.filter(found,function(o) {
+                var tempDate = moment(o.date);
+                return tempDate.isBetween(startDate,endDate);
+
+            });
+
+        }
+        data[name] = found;
+        cb(null,data);
+
+        //available data (mock data)
+
+
+    };
 
   /**
    * add iframe, and populate
@@ -1733,8 +2383,6 @@ dexit.BccVM = function(params) {
     }
 
     if (multimedia.mediaType == 'image') {
-      debugger;
-
       //if targetRegion is already an image node then replace it
       if (targetRegion.nodeName === 'IMG') {
         targetRegion.src = multimedia.mediaPath;
@@ -1766,8 +2414,8 @@ dexit.BccVM = function(params) {
     }
 
     // append lecture title
-    var mmHeading = document.createElement('h3');
-    mmHeading.classList.add('ucc-mm-heading', 'follow-up-text');
+    //var mmHeading = document.createElement('h3');
+    //mmHeading.classList.add('ucc-mm-heading', 'follow-up-text');
 
     if (multimedia.mediaText) {
       var mmText;
@@ -1783,14 +2431,16 @@ dexit.BccVM = function(params) {
             nodeName === 'H1' ||
             nodeName === 'H2' ||
             nodeName === 'P' ||
-            nodeName === 'H3'
+            nodeName === 'H3' ||
+            nodeName === 'H4' ||
+            nodeName === 'H5'
         ) {
           targetRegion.appendChild(mmTextValue);
           if (presentationStyle) {
             $(mmTextValue).css(presentationStyle);
           }
         }else {
-                    mmText = document.createElement('span');
+          mmText = document.createElement('span');
           //mmText.classList.add('brandable-header-text');
           mmText.appendChild(mmTextValue);
           targetRegion.appendChild(mmText);
@@ -1817,7 +2467,7 @@ dexit.BccVM = function(params) {
       var linksContainer = document.createElement('div');
       linksContainer.classList.add('ucc-links-wrapper');
 
-      var mmText = document.createElement('h3');
+      //var mmText = document.createElement('h3');
       if (presentationStyle) {
         $(linksContainer).css(presentationStyle);
       }

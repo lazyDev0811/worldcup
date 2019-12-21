@@ -202,6 +202,20 @@ if(!dexit.scp.device){
 dexit.scp.device.registration={};
 
 
+/**
+ * System behaviouts
+ * @type {{}}
+ */
+dexit.scp.device.sys = {
+    clearRegion: function(data) {
+
+        // if (bccLib) {
+        //     bccLib.clearRegion(data);
+        // }
+        return {defer: true, url: 'local://self.clearCurrentRegion', presentation: {mode:'none'}, fnToCall: 'clearCurrentRegion'};
+    }
+};
+
 //deault to none
 dexit.bccProxyUrl = '';
 
@@ -2891,7 +2905,7 @@ dexit.rtsc.kb.monitor.OfflineQueue = function(id, processInterval){
                 setTimeout(function() {self._processQueue(fn); },interval + 10000);
             } else {
                 //process
-                var toPrcess= value.slice()
+                var toPrcess= value.slice();
                 fn(value, function (err) {
                     if (err) {
                         console.log('error processing queue items:' + err.message);
@@ -3794,7 +3808,7 @@ dexit.scp.device.util.resolveIntelligence = function(def, callback) {
     conceptualObj.getData({key: keyName, id:def.intelligenceKeyValue}, callback);
 
 
-}
+};
 
 
 dexit.scp.device.util.resolveIntelligenceValue = function(def, callback) {
@@ -3817,7 +3831,7 @@ dexit.scp.device.util.resolveIntelligenceValue = function(def, callback) {
         var scId = def.smartContentId;
         var conceptualId = def.conceptualIntelligenceId;
         var informationalId = def.informationalIntelligenceId;
-        var conceptualObj = dexit.scp.device.management.scmanager.smartcontent.object[scId].intelligence[conceptualId]
+        var conceptualObj = dexit.scp.device.management.scmanager.smartcontent.object[scId].intelligence[conceptualId];
         //get informational Name
         var informationalObj = _.find(conceptualObj.information, findIIName);
         if (!informationalObj) {
@@ -3889,122 +3903,122 @@ dexit.scp.device.monitor.createMonitor = function(sc) {
 
 
 
-    var wrap = function (functionToWrap, data, sc, defaultCallback, thisObject) {
-
-        return function () {
-            var args = Array.prototype.slice.call(arguments);
-            var result;
-
-            // wrap callback function
-            var callback = (_.isFunction(_.last(args))) ? args.pop() : defaultCallback;
-            if (callback) {
-                var wrappedCallback = function (err, result) {
-                    if (data) {
-                        data.err = err;
-                        data.result = result;
-                        send(sc, data);
-                    }
-                    callback(err, result);
-                };
-                args.push(wrappedCallback);
-
-            } else if (data) {
-                send(sc, data);
-            }
-
-            result = functionToWrap.apply(thisObject || this, args);
-            return result;
-        };
-    };
-
-    var config = new dexit.rtsc.kb.monitor.Configuration(dexit.scp.device.config.getMonitorConfig());
-    config.id  = sc.id;
-    var monitor = new dexit.rtsc.kb.monitor.WebMonitor(config);
-
-    function addForMonitor(id, data) {
-        monitor.add({sc:id, data:data}, function(err) {
-            if (err) {
-
-            }
-        });
-    }
-
-    function send(sc,data) {
-        var time = Date.now();
-        var id = sc.id + ':'+ sc._channelInstance  +':' + sc._deviceInstance + ":" + time;
-
-
-        //if there are external monitor plugins then call them to also get data
-        var count = Object.keys(dexit.scp.device.monitor._external).length;
-        if (count > 0) {
-            var external = {};
-            var externalExtract = _.after(count, function () {
-                data.external = {};
-                _.extend(data.external,external);
-                addForMonitor(id, data);
-            });
-            //add data from external monitors
-
-            _.each(dexit.scp.device.monitor._external, function (value, pluginName) {
-
-                //grab data
-                dexit.scp.device.monitor._getExternalMonitorPluginData(pluginName, function (err, dat) {
-                    if (dat) {
-                        _.extend(external, dat);
-                    }
-                    externalExtract();
-                });
-            });
-        }else {
-            addForMonitor(id,data)
-        }
-    }
-
-    //bind monitor to smart content
-
-    //wrap behaviour calls
-    _.each(sc.behaviour, function (value, key) {
-        var id = value.id;
-        var fn = value.execute;
-        var data = {'behaviour': id, action: 'execute'};
-
-        sc.behaviour[key].execute = wrap(fn, data, sc, function (err, result) {
-            if (err) {
-
-            } else {
-
-            }
-        });
-
-    });
-
-    //wrap decision calls
-    _.each(sc.decision, function (value, key) {
-        var id = value.id;
-        var fn = value.evaluate;
-        var data = {'decision': id, action: 'evaluate'};
-
-        sc.decision[key].evaluate = wrap(fn, data, sc);
-
-    });
-
-    _.each(sc.intelligence, function (value, key) {
-        var id = value.id;
-        var fn = value.getData;
-        var data = {'intelligence': id, action: 'getData'};
-
-        sc.intelligence[key].getData = wrap(fn, data, sc);
-
-    });
-
-
-
-    monitor._monitor(function() {
-
-    });
-
-    dexit.scp.device.monitor.list[sc.id] = monitor;
-    return monitor;
+    // var wrap = function (functionToWrap, data, sc, defaultCallback, thisObject) {
+    //
+    //     return function () {
+    //         var args = Array.prototype.slice.call(arguments);
+    //         var result;
+    //
+    //         // wrap callback function
+    //         var callback = (_.isFunction(_.last(args))) ? args.pop() : defaultCallback;
+    //         if (callback) {
+    //             var wrappedCallback = function (err, result) {
+    //                 if (data) {
+    //                     data.err = err;
+    //                     data.result = result;
+    //                     send(sc, data);
+    //                 }
+    //                 callback(err, result);
+    //             };
+    //             args.push(wrappedCallback);
+    //
+    //         } else if (data) {
+    //             send(sc, data);
+    //         }
+    //
+    //         result = functionToWrap.apply(thisObject || this, args);
+    //         return result;
+    //     };
+    // };
+    //
+    // var config = new dexit.rtsc.kb.monitor.Configuration(dexit.scp.device.config.getMonitorConfig());
+    // config.id  = sc.id;
+    // var monitor = new dexit.rtsc.kb.monitor.WebMonitor(config);
+    //
+    // function addForMonitor(id, data) {
+    //     monitor.add({sc:id, data:data}, function(err) {
+    //         if (err) {
+    //
+    //         }
+    //     });
+    // }
+    //
+    // function send(sc,data) {
+    //     var time = Date.now();
+    //     var id = sc.id + ':'+ sc._channelInstance  +':' + sc._deviceInstance + ':' + time;
+    //
+    //
+    //     //if there are external monitor plugins then call them to also get data
+    //     var count = Object.keys(dexit.scp.device.monitor._external).length;
+    //     if (count > 0) {
+    //         var external = {};
+    //         var externalExtract = _.after(count, function () {
+    //             data.external = {};
+    //             _.extend(data.external,external);
+    //             addForMonitor(id, data);
+    //         });
+    //         //add data from external monitors
+    //
+    //         _.each(dexit.scp.device.monitor._external, function (value, pluginName) {
+    //
+    //             //grab data
+    //             dexit.scp.device.monitor._getExternalMonitorPluginData(pluginName, function (err, dat) {
+    //                 if (dat) {
+    //                     _.extend(external, dat);
+    //                 }
+    //                 externalExtract();
+    //             });
+    //         });
+    //     }else {
+    //         addForMonitor(id,data);
+    //     }
+    // }
+    //
+    // //bind monitor to smart content
+    //
+    // //wrap behaviour calls
+    // _.each(sc.behaviour, function (value, key) {
+    //     var id = value.id;
+    //     var fn = value.execute;
+    //     var data = {'behaviour': id, action: 'execute'};
+    //
+    //     sc.behaviour[key].execute = wrap(fn, data, sc, function (err, result) {
+    //         if (err) {
+    //
+    //         } else {
+    //
+    //         }
+    //     });
+    //
+    // });
+    //
+    // //wrap decision calls
+    // _.each(sc.decision, function (value, key) {
+    //     var id = value.id;
+    //     var fn = value.evaluate;
+    //     var data = {'decision': id, action: 'evaluate'};
+    //
+    //     sc.decision[key].evaluate = wrap(fn, data, sc);
+    //
+    // });
+    //
+    // _.each(sc.intelligence, function (value, key) {
+    //     var id = value.id;
+    //     var fn = value.getData;
+    //     var data = {'intelligence': id, action: 'getData'};
+    //
+    //     sc.intelligence[key].getData = wrap(fn, data, sc);
+    //
+    // });
+    //
+    //
+    //
+    // monitor._monitor(function() {
+    //
+    // });
+    //
+    // dexit.scp.device.monitor.list[sc.id] = monitor;
+    // return monitor;
 };
 
 
@@ -6573,11 +6587,11 @@ scbehaviour.execute = function(args, callback) {
             if( !executionContext) {
                 //TODO: ST can a better way be found instead of using eval?
                 try {
-                    eval(operation)(argDef);
+                    var result = eval(operation)(argDef);
                 }catch(ex1) {
 
                 }
-                callback();
+                callback(null,result);
             } else {
                 try {
                     executionContext = eval(executionContext);
@@ -7690,7 +7704,9 @@ dexit.scp.device.init = function(args) {
 dexit.device = dexit.device || {};
 dexit.device.util = dexit.device.util || {};
 
-;/*jslint browser: true */
+dexit.device.localData = dexit.device.localData || {};
+
+/*jslint browser: true */
 /*jslint devel: true */
 /*jslint nomen: true */
 /**
@@ -7855,6 +7871,7 @@ dexit.device.sdk = (function (pubSub,logger,EPHandler) {
      * Loads the specified Engagement Pattern with optional overloads
      * @param {object} params
      * @param {string} params.epId - ep Id
+     * @param {string} params.epRevision - ep Id
      * @param {string} [params.overrideContainer] - optional parameter
      * @param {boolean} [params.resume=false] - allows resuming execution of the specified pattern
      * @param callback
@@ -11636,7 +11653,8 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
 
     return {
         initPlayItem: initPlayItem,
-        setUser: setUser
+        setUser: setUser,
+        resolveStaticPlayItem:resolveStaticPlayItem
     };
 
 };
@@ -11839,7 +11857,6 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
 
         if (presentationRef === 'embedded') {
 
-            debugger;
 
             //make current EP layout the parent layout, pass in containerRef
             //in parser make sure to set container to an expression with:
@@ -11884,7 +11901,8 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
             var epElem = {epId: intelResult.epId};
             data.intelligence = epElem;
 
-            var scId = (data.currentElement && data.currentElement.value && data.currentElement.value.scId ? data.currentElement.value.scId : '')
+            var scId = (data.currentElement && data.currentElement.value && data.currentElement.value.scId ? data.currentElement.value.scId : '');
+
 
             //
             // self.stateStorage.init(data.epId,scId,self.deviceId,self.channelId,dexit.device.sdk.getUser(),dexit.scp.device.config.getTouchpoint(),data.instanceTime);
@@ -11897,7 +11915,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
             // self.suspend(data.epId,data.currentElement.id);
             //
             //
-             debugger;
+
             PubSub.publish('dexit.ep.show',{ element:element, scId: scId});
             callback(null, {skip:true});
            // // var this = this;
