@@ -2428,6 +2428,11 @@ dexit.BccVM = function(params) {
         $(mmText).append(multimedia.mediaText);
       }else {
         var mmTextValue = document.createTextNode(multimedia.mediaText);
+
+        if (!targetRegion) {
+            debugger;
+        }
+
         var nodeName = targetRegion.nodeName;
         if (
             nodeName === 'SPAN' ||
