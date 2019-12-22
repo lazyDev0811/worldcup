@@ -129,7 +129,7 @@ JSONForm.fieldTypes['amountToggle'].onInsert =function (data, node) {
   amountToggleTimer= setInterval(function() {
     var sum = 0;
 
-    debugger;
+
     //send either field to the hidden amount field
     var option =  $('input[name="topupmine[0].action"]').val();
     if (option) {
@@ -169,7 +169,7 @@ function getMappingExpression(mappingParams) {
 }
 
 async function sha256(message) {
-    debugger;
+
     const encoder = new TextEncoder('utf-8');
     // encode as UTF-8
     const msgBuffer = encoder.encode(message);
@@ -190,7 +190,7 @@ async function sha256(message) {
 
 var mapFormFields = function(evt, form, previous) {
     evt.preventDefault();
-    debugger;
+
 
     var values = {};
     var rowIdx = -1;
@@ -461,6 +461,9 @@ dexit.guid = function() {
       s4() + '-' + s4() + s4() + s4();
 };
 
+if (!dexit.localData) {
+    dexit.localData = {};
+}
 
 
 bccLib = (function() {
@@ -841,7 +844,7 @@ bccLib = (function() {
 
 
   function show(id, body, callback) {
-    debugger;
+
     if (_.isString(body)) {
       body = JSON.parse(body);
     }
@@ -1257,7 +1260,7 @@ dexit.BccVM = function(params) {
 
     self.showBehaviourInLocalEmbed = function(params, referenceId) {
         var regionElement = self.getRegion(params.regionRef);
-        debugger;
+
 
         var form = document.createElement('FORM');
         form.classList.add('main-content-buttons');
@@ -1277,7 +1280,7 @@ dexit.BccVM = function(params) {
             if (err) {
                 //todo, warn
             }
-            debugger;
+
             // submitThenConfirm = true;
             self._bindBehaviour(params,form,referenceId,isConfirm,values, submitThenConfirm);
         });
@@ -1363,7 +1366,7 @@ dexit.BccVM = function(params) {
                                 if (_.isArray(lookupNames)) {
                                     //TODO;
                                 }else {
-                                    debugger;
+
                                     fieldsetVal.onClick = function(evt, form) {
                                         window[lookupNames](evt,form, self);
                                     }
@@ -1436,7 +1439,7 @@ dexit.BccVM = function(params) {
                 form: formDefMod,
                 value: values || null,
                 onSubmit: function (errors, values) {
-                    debugger;
+
                     //evt.preventDefault();
                     // presentation
                     bccLib.fetchNextElement(referenceId);
@@ -1468,7 +1471,7 @@ dexit.BccVM = function(params) {
 
         function handleResult(err, result) {
 
-            debugger;
+
             if (submitThenConfirm) {
 
                 self._bindBehaviour(params,formElement,referenceId,true,result,false);
@@ -1596,7 +1599,7 @@ dexit.BccVM = function(params) {
         /**
          * Need to include any event handlers (by name)
          */
-        debugger;
+
 
 
 
@@ -1610,7 +1613,7 @@ dexit.BccVM = function(params) {
 
         var formMod = (formDefConfirm ? formDefConfirm : formDef);
 
-        debugger;
+
         formMod = self._prepareFormDef(formMod);
 
 
@@ -1649,7 +1652,7 @@ dexit.BccVM = function(params) {
             form: formMod,
             value: values || null,
             onSubmit: function (errors, values) {
-                debugger;
+
                 //evt.preventDefault();
                 // presentation
                 if (confirmScreen && !submitThenConfirm) {
@@ -1698,7 +1701,7 @@ dexit.BccVM = function(params) {
      * @private
      */
   self._executeBehaviour = function(params, values, referenceId, submitThenConfirm, callback) {
-        debugger;
+
 
       var skipValidation = SKIP_VALIDATION;
 
@@ -1721,7 +1724,7 @@ dexit.BccVM = function(params) {
         };
         //global values
         _.extend(values, globalValues);
-        debugger;
+
 
 
         var presentationMapping = params.serviceDetails.presentationMapping;
@@ -1785,12 +1788,12 @@ dexit.BccVM = function(params) {
             execute: ['map', function(results, cb) {
 
                 if (localSave) {
-                    _.extend(dexit.device.localData, results.map);
-                    cb(null,dexit.device.localData)
+                    _.extend(dexit.localData, results.map);
+                    cb(null,dexit.localData);
                 } else {
 
               if (skipValidation) {
-                debugger;
+
                 if (submitThenConfirm) {
                      self._loadMockData(params,values,cb);
 
@@ -1864,7 +1867,7 @@ dexit.BccVM = function(params) {
         // });
 
     };
-  self._loadMockData = function(params,values, cb) {
+  self._loadMockData = function(params, values, cb) {
 
 
         var inputModel = params.serviceDetails.confirmModel;
@@ -1872,7 +1875,7 @@ dexit.BccVM = function(params) {
             inputModel = JSON.parse(inputModel);
         }
 
-        debugger;
+
         var name = inputModel.title;
         var data = {};
         var found;
@@ -2237,7 +2240,7 @@ dexit.BccVM = function(params) {
             'click',
             function() {
               //alert('clicked');
-              //debugger;
+              //
               bccLib.fetchNextElement(referenceId);
             },
             false,
