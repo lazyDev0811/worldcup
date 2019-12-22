@@ -200,8 +200,10 @@ class Web extends React.Component {
       resetAll: function() {
         const run = `
             setTimeout(() => {
+              try {
               bccLib.resetAll();
               console.log('bccLib.resetAll()');
+              }catch(e){}
             }, 100);
             true;`;
         selfWeb.sendMessage(run);
@@ -359,10 +361,7 @@ class Web extends React.Component {
   // }
 
   openCamera = data => {
-    debugger;
     const {navigation} = this.props;
-
-
     const navigateAction = NavigationActions.navigate({
       routeName: 'QRScreen',
       params: {onCodeCapture: this.onCodeCapture, data: data, selfRef: selfWeb},

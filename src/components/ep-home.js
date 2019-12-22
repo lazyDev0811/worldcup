@@ -21,7 +21,7 @@ module.exports = function() {
     
 
 </head>
-
+<body>
 <!--    <H1> running..</H1>-->
     <div class="status"></div>
     <div id="merch-container" style="width:100%">
@@ -176,6 +176,8 @@ module.exports = function() {
     <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/js/jsonform/2.1.5/jsonform-patched.js"></script>
     <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/js/jsonform/2.1.5/jsv.js"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js" integrity="sha256-gAx3c/BXS1tVc72JrzzIsPxrs2jW+96PfM+Xwwvb9pk=" crossorigin="anonymous"></script>
+
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.3/async.min.js"></script>
     
@@ -201,7 +203,5 @@ module.exports = function() {
 
 
 </html>
-    
-    
 `;
 };

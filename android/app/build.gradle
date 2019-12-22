@@ -133,7 +133,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 40
-        versionName "0.5.11"
+        versionName "0.5.12"
         manifestPlaceholders = [
             appAuthRedirectScheme: 'com.authdemo'
             //appAuthRedirectScheme: 'https://sso-latest.dexit.co/auth/realms/dexit.co/'
