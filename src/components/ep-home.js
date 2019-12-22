@@ -203,7 +203,5 @@ module.exports = function() {
 
 
 </html>
-    
-    
 `;
 };
