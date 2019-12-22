@@ -734,8 +734,29 @@ class Web extends React.Component {
   hideLoadingIndicator() {
     // if (!this.state.loaded) {
     this.setState({loaded: true});
-    // }
+
+
+    //now also inject JS
+    const run = `setTimeout(function() {
+              jQuery(".hover-home .form-group input").each(function() {
+        if (jQuery(this).val().length > 0) {
+            jQuery(this).closest(".form-group").addClass("hasvalue");
+        } else {
+            jQuery(this).closest(".form-group").removeClass("hasvalue");
+        }
+    });
+    jQuery(".hover-home .form-group input").on("input", function() {
+        if (jQuery(this).val().length > 0) {
+            jQuery(this).closest(".form-group").addClass("hasvalue");
+        } else {
+            jQuery(this).closest(".form-group").removeClass("hasvalue");
+        }
+    });
+            }, 100);
+            true;`;
+    this.sendMessage(run);
   }
+
   loadPortal(tpId, bcType, callback) {
     let self = this;
     // eslint-disable-next-line
