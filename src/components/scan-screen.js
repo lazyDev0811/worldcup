@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   Linking,
+  Alert,
 } from 'react-native';
 
 import QRCodeScanner from 'react-native-qrcode-scanner';
@@ -27,11 +28,36 @@ class ScanScreen extends Component {
     passThroughData = this.props.navigation.state.params.data;
     parentRef = this.props.navigation.state.params.selfRef;
 
-
   }
   onBackPress = () => {
     debugger;
-    this.props.navigation.goBack();
+
+
+    Alert.alert(
+        'QR Camera',
+        'Cancelling will stop your current transaction',
+        [
+          {text: 'OK', onPress: () => {
+              this.props.navigation.state.params.onCodeCapture(null, passThroughData, parentRef);
+              this.props.navigation.goBack();
+            }
+          },
+          {
+            text: 'Cancel',
+            onPress: () => {
+              //cancel called
+            },
+            style: 'cancel',
+          }
+        ],
+        {cancelable: false},
+    );
+
+    // this.props.navigation.state.params.onCodeCapture(e.data, passThroughData, parentRef);
+    //
+    //
+    // this.props.navigation.goBack();
+
   };
 
   onSuccess = e => {

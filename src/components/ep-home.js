@@ -199,7 +199,23 @@ module.exports = function() {
 <!--        })      -->
 <!--    </script>-->
 <!--    -->
-<!--    <script>-->
+    <script>
+    
+        function keyboardShown() {
+            debugger;
+            console.log('keyboard shown');
+            jQuery('div.bottom-menu').attr('hidden',true);
+
+        }
+        
+        function keyboardHidden() {
+            console.log('keyboard hidden');
+            jQuery('div.bottom-menu').removeAttr('hidden');
+    
+        }
+        
+    </script>
+    
 <!--    jQuery(document).ready(function() {-->
 
 <!--        jQuery(".hover-home .form-group input").each(function() {-->

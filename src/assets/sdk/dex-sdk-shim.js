@@ -10552,10 +10552,15 @@ dexit.ExecutionManager.prototype._checkStopped = function(eg){
     eg.executionDoneCallback = eg.executionDoneCallback || function(){};
 
     eg.executionDoneCallback();
+
+
     var index = _.findIndex(this.executions, ['id',eg.id]);
     if (index !== -1) {
         this.executions.splice(index,1);
     }
+    //clear the callback?
+    //eg.executionDoneCallback = null;
+
 };
 
 

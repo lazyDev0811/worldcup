@@ -14,19 +14,19 @@ var topupFormArrayTemplate = `<div id="<%= id %>"><ul class="_jsonform-array-ul"
      <span class="_jsonform-array-buttons">
          <a href="#" class="btn btn-secondary _jsonform-array-addmore">Add Another Number
              </a>
-              &nbsp;
+              &nbsp;    
              <a href="#" class="btn btn-secondary _jsonform-array-deletelast">Remove Last Number</a></span></div>`;
 
 
 JSONForm.fieldTypes['transactionTitle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['text']);
-JSONForm.fieldTypes['transactionTitle'].template = `<div class="heading-wrraper margin-bottom-10">
+JSONForm.fieldTypes['transactionTitle'].template = `<div class="heading-wrraper margin-bottom-total-trans-detail">
                 <div class="top-heading">
                     <h3 type="text">Transaction #<%= value %></h3>
                 </div>
             </div>`;
 
 JSONForm.fieldTypes['title'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
-JSONForm.fieldTypes['title'].template = `<div class="heading-wrraper margin-bottom-10">
+    JSONForm.fieldTypes['title'].template = `<div class="heading-wrraper">
                 <div class="top-heading">
                     <h3><%= elt.helpvalue %></h3>
                 </div>
@@ -36,8 +36,11 @@ var totalAmountTimer = null;
 
 JSONForm.fieldTypes['totalAmount'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
 
-JSONForm.fieldTypes['totalAmount'].template =`<div id="<%= id %>" class="total-wraper margin-bottom-10">
-            <span total-amount="amount" class="amunt"><%= value %></span>
+    // JSONForm.fieldTypes['totalAmount'].template =`<div id="<%= id %>" class="total-wraper margin-bottom-10">
+    //         <span total-amount="amount" class="amunt"><%= value %></span>
+    //     </div>`;
+    JSONForm.fieldTypes['totalAmount'].template =`<div id="<%= id %>" class="margin-bottom-10 balance-value">
+            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"><%=  value %></span>
         </div>`;
 // template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
 JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
@@ -54,6 +57,36 @@ JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
 
   }, 1000);
 };
+    //Special extension for FF where input is either in select or dropdown
+    //if user types in, then that takes precendence
+    var totalAmountMineTimer = null;
+
+    JSONForm.fieldTypes['totalAmountMine'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+    JSONForm.fieldTypes['totalAmountMine'].template =`<div id="<%= id %>" class="margin-bottom-10 balance-value">
+            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"><%=  value %></span>
+        </div>`;
+    JSONForm.fieldTypes['totalAmountMine'].onInsert =function (data, node) {
+    // Compute the value of "myvalue" here
+    if (totalAmountMineTimer) {
+            clearInterval(totalAmountMineTimer);
+    }
+        totalAmountMineTimer = setInterval(function() {
+        var sum = 0;
+
+        var manualAmount = $('[name$="amountManual"]').val();
+        var selectedAmount = $('[name$="amountPredefined"]').val();
+        if (manualAmount) {
+            sum += + manualAmount;
+        } else if  (selectedAmount) {
+            sum+= + selectedAmount;
+        }
+
+        $('[name$="topupmine[0].amount"]').val(sum);
+        $('span[total-amount="amount"]').text(sum);
+
+    }, 1000);
+};
+
 
 JSONForm.fieldTypes['subTitle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['text']);
 
@@ -68,8 +101,6 @@ JSONForm.fieldTypes['textSection'] = jQuery.extend(true, {}, JSONForm.fieldTypes
 
 JSONForm.fieldTypes['textSection'].template = `<div class="voucher-wraper">
                 <p style="padding-top:20px"><%= value %></p></div>`;
-
-var balanceCheckTimer = null;
 
 var balanceCheckTimer = null;
 
@@ -103,53 +134,26 @@ JSONForm.fieldTypes['balanceCheck'].onInsert =function (data, node) {
 };
 
 JSONForm.fieldTypes['balance'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
-
-JSONForm.fieldTypes['balance'].template =`<div id="<%= id %>" class="total-wraper margin-bottom-35">
-            <span balance-amount="amount" class="amunt"><%= myvalue %></span>
+    JSONForm.fieldTypes['balance'].template =`<div id="<%= id %>" class="margin-bottom-10 balance-value">
+            <span><%= typeof(mytitle)!== 'undefined' ?  mytitle : '' %> &nbsp; <span/><span balance-amount="amount" class="green"><%= myvalue %></span>
         </div>`;
 
 JSONForm.fieldTypes['balance'].onBeforeRender = function (data, node) {
   // Compute the value of "myvalue" here
   data.myvalue = data.elt.helpvalue;
+        data.mytitle = data.elt.title2;
 };
 
-var amountToggleTimer = null;
-JSONForm.fieldTypes['amountToggle'] = jQuery.extend(true, {}, JSONForm.fieldTypes['selectfieldset']);
+JSONForm.fieldTypes['formHeading'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+JSONForm.fieldTypes['formHeading'].template = `<h2 class="form-heading"><%= elt.helpvalue %></h2>`;
 
-JSONForm.fieldTypes['amountToggle'].onInsert =function (data, node) {
-  $(node.el).find('select.nav').first().on('change', function (evt) {
-    var $option = $(this).find('option:selected');
-    $(node.el).find('input[type="hidden"]').first().val($option.attr('value'));
-  });
-
-  // Compute the value of "myvalue" here
-  if (amountToggleTimer) {
-    clearInterval(amountToggleTimer);
-  }
-  amountToggleTimer= setInterval(function() {
-    var sum = 0;
-
-
-    //send either field to the hidden amount field
-    var option =  $('input[name="topupmine[0].action"]').val();
-    if (option) {
-      var val = "";
-      if (option === 'Enter Top Up Amount') {
-        val = $('[name$="topupmine[0].amountManual"]').val();
-
-      }else {
-        val = $('[name$="topupmine[0].amountPredefined"]').val();
-      }
-
-      var lastVal = $('[name$="topupmine[0].amount"]').val();
-      if (lastVal !== val) {
-        $('[name$="topupmine[0].amount"]').val(val);
-      }
-    }
-  }, 2000);
-
+JSONForm.fieldTypes['2Column'] = {
+    template: `<div class="recpt-title">
+                    <span style="float:left"><%= elt.left %></span>
+                     <span style="float:right"><%= elt.right %></span>
+            </div>`,
+    fieldTemplate: true
 };
-
 
 
 /**
@@ -1452,6 +1456,38 @@ dexit.BccVM = function(params) {
             };
             $(formElement).jsonForm(formDefinition);
 
+            jQuery(".hover-home .form-group input").each(function() {
+                if (jQuery(this).val().length > 0) {
+                    jQuery(this).closest(".form-group").addClass("hasvalue");
+                } else {
+                    jQuery(this).closest(".form-group").removeClass("hasvalue");
+                }
+            });
+            jQuery(".hover-home .form-group input").on("input", function() {
+                if (jQuery(this).val().length > 0) {
+                    jQuery(this).closest(".form-group").addClass("hasvalue");
+                } else {
+                    jQuery(this).closest(".form-group").removeClass("hasvalue");
+                }
+            });
+            jQuery(".hover-home .form-group select").on("change", function() {
+                if (jQuery(this).val().length > 0) {
+                    jQuery(this).closest(".form-group").addClass("hasvalue");
+                } else {
+                    jQuery(this).closest(".form-group").removeClass("hasvalue");
+                }
+            });
+
+
+            jQuery(".hover-home .form-group select").each(function() {
+                if (jQuery(this).val().length > 0) {
+                    jQuery(this).closest(".form-group").addClass("hasvalue");
+                } else {
+                    jQuery(this).closest(".form-group").removeClass("hasvalue");
+                }
+            });
+
+
 
             if (autoComplete) {
                 bccLib.fetchNextElement(referenceId);
@@ -1680,6 +1716,37 @@ dexit.BccVM = function(params) {
             }
         };
         $(formElement).jsonForm(formDefinition);
+
+        jQuery(".hover-home .form-group input").each(function() {
+            if (jQuery(this).val().length > 0) {
+                jQuery(this).closest(".form-group").addClass("hasvalue");
+            } else {
+                jQuery(this).closest(".form-group").removeClass("hasvalue");
+            }
+        });
+        jQuery(".hover-home .form-group input").on("input", function() {
+            if (jQuery(this).val().length > 0) {
+                jQuery(this).closest(".form-group").addClass("hasvalue");
+            } else {
+                jQuery(this).closest(".form-group").removeClass("hasvalue");
+            }
+        });
+        jQuery(".hover-home .form-group select").on("change", function() {
+            if (jQuery(this).val().length > 0) {
+                jQuery(this).closest(".form-group").addClass("hasvalue");
+            } else {
+                jQuery(this).closest(".form-group").removeClass("hasvalue");
+            }
+        });
+
+
+        jQuery(".hover-home .form-group select").each(function() {
+            if (jQuery(this).val().length > 0) {
+                jQuery(this).closest(".form-group").addClass("hasvalue");
+            } else {
+                jQuery(this).closest(".form-group").removeClass("hasvalue");
+            }
+        });
     };
 
 
@@ -2221,6 +2288,14 @@ dexit.BccVM = function(params) {
         ),
         interStitial = document.createElement('div');
 
+
+      if (!targetRegion) {
+          debugger;
+          console.log('problem creating asset for multimedia: '+ JSON.stringify(multimedia));
+         // bccLib.fetchNextElement(referenceId);
+          return;
+      }
+
     // need to update most of the following functions to include references to the region each element
     // is supposed to be rendered into
     self.clearDiv(targetRegion);
@@ -2429,9 +2504,6 @@ dexit.BccVM = function(params) {
       }else {
         var mmTextValue = document.createTextNode(multimedia.mediaText);
 
-        if (!targetRegion) {
-            debugger;
-        }
 
         var nodeName = targetRegion.nodeName;
         if (
