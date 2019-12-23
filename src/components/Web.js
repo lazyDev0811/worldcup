@@ -6,6 +6,7 @@ import {
   Text,
   AppState,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import {WebView} from 'react-native-webview';
 import PubSub from 'pubsub-js';
@@ -306,6 +307,27 @@ class Web extends React.Component {
         //self.sendMessage(JSON.stringify([layoutId,container, layoutHtml]));
       },
     };
+
+    Keyboard.addListener('keyboardDidShow',(frames)=>{
+      const run = `
+             setTimeout(() => {
+               keyboardShown();
+            }, 10);
+            `;
+      selfWeb.sendMessage(run);
+    })
+    ;
+    Keyboard.addListener('keyboardWillHide',(frames)=>{
+
+      const run = `
+             setTimeout(() => {
+                keyboardHidden();
+            }, 10);
+            `;
+      selfWeb.sendMessage(run)
+    });
+
+
   }
 
   // componentDidMount() {
@@ -1017,6 +1039,8 @@ class Web extends React.Component {
         null,
         data,
       );
+    }else {
+      //TODO: go back?
     }
 
     console.log(data);
@@ -1120,6 +1144,7 @@ class Web extends React.Component {
           onMessage={event => {
             this.handleMessage(event);
           }}
+          scalesPageToFit={false}
           allowFileAccess={true}
           allowFileAccessFromFileURLs={true}
           key={this.state.key}
