@@ -321,12 +321,13 @@ class Web extends React.Component {
          setTimeout(() => {
           
            //let lastBtn = document.querySelector("#loadTest");
-           
-           
-           
-           
+       
            let loader = document.querySelector(".preloader");
            loader.style.display = "";
+           loader.style.opacity = 1;
+           
+           
+           
            function removeLdr() {
              //console.log("good");
              //loader.style.display = "none";
@@ -360,11 +361,34 @@ class Web extends React.Component {
            // }
            //
            // setTimeout(function() {
-           loader.style.display = "none";
+           // loader.style.display = "none";
            // },500);
+           
+           function removeLdr() {
+          var op = 1;
+          timer = setInterval(function () {
+            if (op <= 0.1){
+              clearInterval(timer);
+              loader.style.display = 'none';
+            }
+            loader.style.opacity = op;
+            loader.style.filter = 'alpha(opacity=' + op * 100 + ")";
+            op -= op * 0.1;
+          }, 100);
+        }
+           
+           
+           setTimeout(function() {
+           removeLdr()
+           }, 500);
+           
+           
 
            //lastBtn.addEventListener("load", removeLdr);
          },800);`
+
+
+
         selfWeb.sendMessage(run);
       }
 
@@ -506,7 +530,8 @@ class Web extends React.Component {
           //1: unload current EP (data.element.epId), and wait
           //2: load new element
           debugger;
-          self.showLoadingIndicator();
+          // self.showLoadingIndicator();
+          self.bccLib.startTransition();
           self.goToEP(data.element.intelligence, data.element.epId);
         }
       });
@@ -830,12 +855,12 @@ class Web extends React.Component {
     }
   }
   showLoadingIndicator() {
-    // this.setState({loaded: false});
+    this.setState({loaded: false});
   }
 
   hideLoadingIndicator() {
     // if (!this.state.loaded) {
-    // this.setState({loaded: true});
+    this.setState({loaded: true});
 
 
     // //now also inject JS
