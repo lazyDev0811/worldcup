@@ -390,7 +390,7 @@ class Web extends React.Component {
                 keyboardHidden();
             }, 10);
             `;
-      selfWeb.sendMessage(run)
+      selfWeb.sendMessage(run);
     });
 
 
@@ -425,13 +425,20 @@ class Web extends React.Component {
     AppState.removeEventListener('change', () => this._handleAppStateChange);
   }
   _handleAppStateChange(nextAppState) {
+
     debugger;
     if (
       this.state.appState.match(/inactive|background/) &&
       nextAppState === 'active'
     ) {
+      alert('app went to foreground');
+
       let key = this.state.key;
       this.setState({key: key + 1});
+      // self.loadPortal(self.tpId, '', function(err) {
+      //   console.log(err);
+      // });
+
     }
     this.setState({appState: nextAppState});
   }
@@ -823,12 +830,12 @@ class Web extends React.Component {
     }
   }
   showLoadingIndicator() {
-    this.setState({loaded: false});
+    // this.setState({loaded: false});
   }
 
   hideLoadingIndicator() {
     // if (!this.state.loaded) {
-    this.setState({loaded: true});
+    // this.setState({loaded: true});
 
 
     // //now also inject JS
