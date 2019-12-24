@@ -49,11 +49,13 @@ JSONForm.fieldTypes['totalAmountReceipt'].onInsert =function (data, node) {
     }
     totalAmountReceiptTimer = setInterval(function() {
         var sum = 0;
-        $('[name="amount"]').each(function(){
+        $('[name$="amount"]').each(function(){
             var val = $(this).val() || 0;
-            sum += val;
+            sum = sum + parseFloat(val);
         });
-        $('span[total-amount="amount"]').text(sum);
+        if (sum > 0) {
+            $('span[total-amount="amount"]').text(sum);
+        }
 
     }, 2000);
 };
@@ -76,11 +78,13 @@ JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
   }
   totalAmountTimer = setInterval(function() {
     var sum = 0;
-    $('[name="amount"]').each(function(){
+    $('[name$="amount"]').each(function(){
         var val = $(this).val() || 0;
-        sum += val;
+        sum = sum + parseInt(val);
     });
-    $('span[total-amount="amount"]').text(sum);
+    if (sum > 0) {
+        $('span[total-amount="amount"]').text(sum);
+    }
 
   }, 1000);
 };
