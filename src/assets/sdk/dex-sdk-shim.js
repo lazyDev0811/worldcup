@@ -10456,7 +10456,8 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
         };
         this.stateStorage.setElementStateInfo(toSave,'running');
 
-        self.plugin.startTransition();
+        dexit.device.sdk.presentationMng.plugin
+            .startTransition();
         //TODO: better handle preparing layout
         dexit.device.sdk.presentationMng.showElement(data, function(err) {
             if (err) {
@@ -10483,15 +10484,13 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
 
 
 
-                    setTimeout(function(){
+
                         if (counter < 1 && dexit.device.sdk.getParentRef()) {
-
-                             dexit.device.sdk.getParentRef().hideLoadingIndicator();
-                            debugger;
-                            self.plugin.endTransition();
+                            setTimeout(function () {
+                                dexit.device.sdk.getParentRef().hideLoadingIndicator();
+                                dexit.device.sdk.presentationMng.plugin.endTransition();
+                            }, 900);
                         }
-                    }, 700)
-
 
 
 
@@ -11799,7 +11798,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                     }
                     data.id = toPass;
                     //make sure id is passed back with layout
-                    debugger;
+
 
                     AsyncStorage.setItem('layout-'+toPass, JSON.stringify(data), (err2) => {
                         if (err2) {
