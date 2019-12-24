@@ -159,7 +159,7 @@ class Web extends React.Component {
                   // selfWeb.openCamera();
 
                   debugger;
-                } else if (data.element.intelligence.epId == '111111')  {
+                } else if (data.element.intelligence.epId == '111117')  {
                   debugger;
                   selfRef.callNumber(data);
                 }
@@ -182,7 +182,6 @@ class Web extends React.Component {
                 executeArgs.args,
                 executeArgs.inputs,
                 (err, resp) => {
-
                   selfWeb.bccLib.sendBehaviourResponse(responseId, err, resp);
                 },
               );
@@ -264,11 +263,11 @@ class Web extends React.Component {
       },
       setErrorStatus: function(err) {
         debugger;
-
+        console.log(err);
         var errStr = err.message;
         const run = `
             setTimeout(() => {
-              bccLib.setErrorStatus(${errStr});
+              bccLib.setErrorStatus('${errStr}');
             }, 100);
             true;`;
         selfWeb.sendMessage(run);
@@ -333,9 +332,9 @@ class Web extends React.Component {
              //loader.style.display = "none";
            }
            
-           setTimeout(function() {
-           loader.style.display = "none";
-           },500);
+           // setTimeout(function() {
+           // loader.style.display = "none";
+           // },500);
 
            //lastBtn.addEventListener("load", removeLdr);
          },10);`
@@ -365,7 +364,7 @@ class Web extends React.Component {
            // },500);
 
            //lastBtn.addEventListener("load", removeLdr);
-         },10);`
+         },800);`
         selfWeb.sendMessage(run);
       }
 
@@ -832,25 +831,25 @@ class Web extends React.Component {
     this.setState({loaded: true});
 
 
-    //now also inject JS
-    const run = `setTimeout(function() {
-              jQuery(".hover-home .form-group input").each(function() {
-        if (jQuery(this).val().length > 0) {
-            jQuery(this).closest(".form-group").addClass("hasvalue");
-        } else {
-            jQuery(this).closest(".form-group").removeClass("hasvalue");
-        }
-    });
-    jQuery(".hover-home .form-group input").on("input", function() {
-        if (jQuery(this).val().length > 0) {
-            jQuery(this).closest(".form-group").addClass("hasvalue");
-        } else {
-            jQuery(this).closest(".form-group").removeClass("hasvalue");
-        }
-    });
-            }, 100);
-            true;`;
-    this.sendMessage(run);
+    // //now also inject JS
+    // const run = `setTimeout(function() {
+    //           jQuery(".hover-home .form-group input").each(function() {
+    //     if (jQuery(this).val().length > 0) {
+    //         jQuery(this).closest(".form-group").addClass("hasvalue");
+    //     } else {
+    //         jQuery(this).closest(".form-group").removeClass("hasvalue");
+    //     }
+    // });
+    // jQuery(".hover-home .form-group input").on("input", function() {
+    //     if (jQuery(this).val().length > 0) {
+    //         jQuery(this).closest(".form-group").addClass("hasvalue");
+    //     } else {
+    //         jQuery(this).closest(".form-group").removeClass("hasvalue");
+    //     }
+    // });
+    //         }, 100);
+    //         true;`;
+    // this.sendMessage(run);
   }
 
   loadPortal(tpId, bcType, callback) {
