@@ -121,6 +121,11 @@ class Web extends React.Component {
           if (id) {
             //get the callback
             let cb = this.uuidsToCb[obj.id];
+            if (!cb) {
+              debugger;
+              console.log('no cb');
+            }
+
             if (obj.hasError && obj.error) {
               var error = new Error(obj.error);
               cb(error);
@@ -309,7 +314,66 @@ class Web extends React.Component {
         selfWeb.sendMessage(run);
         //self.sendMessage(JSON.stringify([layoutId,container, layoutHtml]));
       },
+      startTransition: function() {
+
+
+        //determine last element
+        var run =`
+         setTimeout(() => {
+          
+           //let lastBtn = document.querySelector("#loadTest");
+           
+           
+           
+           
+           let loader = document.querySelector(".preloader");
+           loader.style.display = "";
+           function removeLdr() {
+             //console.log("good");
+             //loader.style.display = "none";
+           }
+           
+           setTimeout(function() {
+           loader.style.display = "none";
+           },500);
+
+           //lastBtn.addEventListener("load", removeLdr);
+         },10);`
+        selfWeb.sendMessage(run);
+      },
+      endTransition: function() {
+
+
+        //determine last element
+        var run = `
+         setTimeout(() => {
+          
+           //let lastBtn = document.querySelector("#loadTest");
+           
+           
+           
+           
+           let loader = document.querySelector(".preloader");
+
+           // function removeLdr() {
+           //   //console.log("good");
+           //   //loader.style.display = "none";
+           // }
+           //
+           // setTimeout(function() {
+           loader.style.display = "none";
+           // },500);
+
+           //lastBtn.addEventListener("load", removeLdr);
+         },10);`
+        selfWeb.sendMessage(run);
+      }
+
     };
+
+
+
+
 
     Keyboard.addListener('keyboardDidShow',(frames)=>{
       const run = `
@@ -925,11 +989,12 @@ class Web extends React.Component {
     dexit.device.sdk.loadEngagementPattern(epToUse, null, function(err) {
       if (err) {
         debugger;
-        console.log('error loading', err);
+        console.log('error loading');
         //TODO: show error
 
-        alert('failed to load pattern:' + epToUse);
-        alert(JSON.stringify(err));
+
+        // alert('failed to load pattern:' + epToUse);
+        // alert(JSON.stringify(err));
         //self.showFlashWarning('There was a problem with the configured portal');
       }
     });

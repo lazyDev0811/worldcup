@@ -32,6 +32,32 @@ JSONForm.fieldTypes['title'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help
                 </div>
             </div>`;
 
+
+
+
+JSONForm.fieldTypes['totalAmountReceipt'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+JSONForm.fieldTypes['totalAmountReceipt'].template = `<div id="" class="margin-bottom-10 balance-value"><div class="recpt-title">
+<span class="float-left">Top-up Amount</span>
+<span total-amount="amount" class="green float-right" style="margin-left: 18%;">15</span>
+</div></div>`;
+
+var totalAmountReceiptTimer = null;
+JSONForm.fieldTypes['totalAmountReceipt'].onInsert =function (data, node) {
+    // Compute the value of "myvalue" here
+    if (totalAmountReceiptTimer) {
+        clearInterval(totalAmountReceiptTimer);
+    }
+    totalAmountReceiptTimer = setInterval(function() {
+        var sum = 0;
+        $('[name="amount"]').each(function(){
+            var val = $(this).val() || 0;
+            sum += val;
+        });
+        $('span[total-amount="amount"]').text(sum);
+
+    }, 2000);
+};
+
 var totalAmountTimer = null;
 
 JSONForm.fieldTypes['totalAmount'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
@@ -76,9 +102,9 @@ JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
         var manualAmount = $('[name$="amountManual"]').val();
         var selectedAmount = $('[name$="amountPredefined"]').val();
         if (manualAmount) {
-            sum += + manualAmount;
+            sum += parseFloat(manualAmount);
         } else if  (selectedAmount) {
-            sum+= + selectedAmount;
+            sum += parseFloat(selectedAmount);
         }
 
         $('[name$="topupmine[0].amount"]').val(sum);
