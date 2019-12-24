@@ -50,15 +50,15 @@ JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
   }
   totalAmountTimer = setInterval(function() {
     var sum = 0;
-    $('[name$="amount"]').each(function(){
-      sum += + $(this).val()
+    $('[name="amount"]').each(function(){
+        var val = $(this).val() || 0;
+        sum += val;
     });
     $('span[total-amount="amount"]').text(sum);
 
   }, 1000);
 };
-    //Special extension for FF where input is either in select or dropdown
-    //if user types in, then that takes precendence
+
     var totalAmountMineTimer = null;
 
     JSONForm.fieldTypes['totalAmountMine'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
