@@ -30,7 +30,7 @@ module.exports = function() {
 <!--    <H1> running..</H1>-->
     <div class="status"></div>
     
-    <div class="con">
+   <div id="tog" class="con fade-in">
     <div class="preloader">
       <img src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/images/spinner.svg" alt="spinner">
       <p class="fade-in">LOADING...</p>

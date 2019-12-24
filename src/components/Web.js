@@ -319,25 +319,13 @@ class Web extends React.Component {
         //determine last element
         var run =`
          setTimeout(() => {
-          
-           //let lastBtn = document.querySelector("#loadTest");
-       
            let loader = document.querySelector(".preloader");
-           loader.style.display = "";
-           loader.style.opacity = 1;
-           
-           
            
            function removeLdr() {
-             //console.log("good");
-             //loader.style.display = "none";
-           }
-           
-           // setTimeout(function() {
-           // loader.style.display = "none";
-           // },500);
-
-           //lastBtn.addEventListener("load", removeLdr);
+              loader.classList.toggle("fade-out");
+            }
+           removeLdr()
+         
          },10);`
         selfWeb.sendMessage(run);
       },
@@ -347,52 +335,20 @@ class Web extends React.Component {
         //determine last element
         var run = `
          setTimeout(() => {
-          
-           //let lastBtn = document.querySelector("#loadTest");
-           
-           
-           
-           
-           let loader = document.querySelector(".preloader");
-
-           // function removeLdr() {
-           //   //console.log("good");
-           //   //loader.style.display = "none";
-           // }
-           //
-           // setTimeout(function() {
-           // loader.style.display = "none";
-           // },500);
-           
-           function removeLdr() {
-          var op = 1;
-          timer = setInterval(function () {
-            if (op <= 0.1){
-              clearInterval(timer);
-              loader.style.display = 'none';
-            }
-            loader.style.opacity = op;
-            loader.style.filter = 'alpha(opacity=' + op * 100 + ")";
-            op -= op * 0.1;
-          }, 100);
-        }
-           
-           
-           setTimeout(function() {
-           removeLdr()
-           }, 500);
-           
-           
-
-           //lastBtn.addEventListener("load", removeLdr);
-         },800);`
-
-
+       
+         let loader = document.querySelector(".preloader");
+         
+         function removeLdr() {
+            loader.classList.toggle("fade-in");
+          }
+         removeLdr()
+         
+         },250);`;
 
         selfWeb.sendMessage(run);
-      }
+      },
 
-    };
+    }; //end bcc-lib
 
 
 
@@ -479,6 +435,9 @@ class Web extends React.Component {
   //   }
   // }
   callNumber = data => {
+
+    debugger;
+    alert('calling number');
     const number =
       data && data.callNumber
         ? data.callNumber
@@ -531,7 +490,7 @@ class Web extends React.Component {
           //2: load new element
           debugger;
           // self.showLoadingIndicator();
-          self.bccLib.startTransition();
+          // self.bccLib.startTransition();
           self.goToEP(data.element.intelligence, data.element.epId);
         }
       });
@@ -1296,7 +1255,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F5FCFF88',
+    backgroundColor: 'transparent',
   },
   CameraViewIndicator: {
     position: 'absolute',
