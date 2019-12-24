@@ -14,7 +14,7 @@ import {
   configIOS,
   configAndriod,
   configShared,
-  resetNavigation,
+  resetNavigation, callNumber,
 } from '../utils/Helper';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -154,6 +154,9 @@ class Web extends React.Component {
                   // selfWeb.openCamera();
 
                   debugger;
+                } else if (data.element.intelligence.epId == '111111')  {
+                  debugger;
+                  selfRef.callNumber(data);
                 }
                 //alert(data.element.intelligence.epId);
               } else {
@@ -381,6 +384,13 @@ class Web extends React.Component {
   //     this._asyncLoad.cancel();
   //   }
   // }
+  callNumber = data => {
+    const number =
+      data && data.callNumber
+        ? data.callNumber
+        : configShared.supportPhoneNumber;
+    callNumber(number);
+  };
 
   openCamera = data => {
     const {navigation} = this.props;

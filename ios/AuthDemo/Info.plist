@@ -63,6 +63,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-    <string>Camera is needed to scan QR Code</string>
+	<string>Camera is needed to scan QR Code</string>
 </dict>
 </plist>
