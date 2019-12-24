@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform,
+  Platform, AppState,
 } from 'react-native';
 import RNRestart from 'react-native-restart';
 import {NavigationActions, StackActions} from 'react-navigation';
@@ -35,8 +35,11 @@ class HomeScreen extends Component {
     super(props);
     this.state = {
       token: ' ',
+      appState: AppState.currentState,
     };
   }
+
+
 
   componentDidMount() {
     access_Token = this.props.navigation.state.params.accessToken;
@@ -45,9 +48,31 @@ class HomeScreen extends Component {
 
     // accessTokenExpirationDate = this.props.navigation.state.params.accessTokenExpirationDate;
     //TODO: check date and expiry
+    AppState.addEventListener('change', () => this._handleAppStateChange);
   }
 
-  onCheckPress = () => {
+  componentWillUnmount() {
+    AppState.removeEventListener('change', () => this._handleAppStateChange);
+  }
+  _handleAppStateChange(nextAppState) {
+    debugger;
+    if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === 'active'
+    ) {
+      alert('home: app went to foreground');
+      this.onLogoutPress();
+
+      // let key = this.state.key;
+      // this.setState({key: key + 1});
+      // self.loadPortal(self.tpId, '', function(err) {
+      //   console.log(err);
+      // });
+
+    }
+  }
+
+    onCheckPress = () => {
     this.setState({
       token: access_Token,
     });
