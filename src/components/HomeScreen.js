@@ -249,9 +249,13 @@ class HomeScreen extends Component {
   }
 
   render() {
-    return <View><StatusBar backgroundColor="white" barStyle="light-content" />
-    return <View style={styles.container}>{this.renderMain()}</View>;
-    </View>
+    return (
+      <View>
+        <StatusBar backgroundColor="white" barStyle="light-content" />
+        <View style={styles.container}>{this.renderMain()}</View>
+      </View>
+    );
+    // return <View style={styles.container}>{this.renderMain()}</View>;
   }
 }
 
