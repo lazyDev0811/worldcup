@@ -356,7 +356,7 @@ class Web extends React.Component {
       selfWeb.sendMessage(run);
     })
     ;
-    Keyboard.addListener('keyboardWillHide',(frames)=>{
+    Keyboard.addListener('keyboardDidHide',(frames)=>{
 
       const run = `
              setTimeout(() => {

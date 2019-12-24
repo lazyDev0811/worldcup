@@ -220,6 +220,7 @@ module.exports = function() {
         }
         
         function keyboardHidden() {
+            
             console.log('keyboard hidden');
             jQuery('div.bottom-menu').removeAttr('hidden');
     
