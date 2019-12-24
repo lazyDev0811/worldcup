@@ -10456,7 +10456,7 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
         };
         this.stateStorage.setElementStateInfo(toSave,'running');
 
-
+        self.plugin.startTransition();
         //TODO: better handle preparing layout
         dexit.device.sdk.presentationMng.showElement(data, function(err) {
             if (err) {
@@ -10487,8 +10487,13 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
                         if (counter < 1 && dexit.device.sdk.getParentRef()) {
 
                              dexit.device.sdk.getParentRef().hideLoadingIndicator();
+                            debugger;
+                            self.plugin.endTransition();
                         }
-                    }, 500)
+                    }, 700)
+
+
+
 
 
                 }, wait);

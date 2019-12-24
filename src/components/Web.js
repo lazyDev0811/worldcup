@@ -309,7 +309,66 @@ class Web extends React.Component {
         selfWeb.sendMessage(run);
         //self.sendMessage(JSON.stringify([layoutId,container, layoutHtml]));
       },
+      startTransition: function() {
+
+
+        //determine last element
+        var run =`
+         setTimeout(() => {
+          
+           //let lastBtn = document.querySelector("#loadTest");
+           
+           
+           
+           
+           let loader = document.querySelector(".preloader");
+
+           function removeLdr() {
+             //console.log("good");
+             //loader.style.display = "none";
+           }
+           
+           setTimeout(function() {
+           loader.style.display = "none";
+           },500);
+
+           //lastBtn.addEventListener("load", removeLdr);
+         },10);`
+        selfWeb.sendMessage(run);
+      },
+      endTransition: function() {
+
+
+        //determine last element
+        var run = `
+         setTimeout(() => {
+          
+           //let lastBtn = document.querySelector("#loadTest");
+           
+           
+           
+           
+           let loader = document.querySelector(".preloader");
+
+           // function removeLdr() {
+           //   //console.log("good");
+           //   //loader.style.display = "none";
+           // }
+           //
+           // setTimeout(function() {
+           loader.style.display = "none";
+           // },500);
+
+           //lastBtn.addEventListener("load", removeLdr);
+         },10);`
+        selfWeb.sendMessage(run);
+      }
+
     };
+
+
+
+
 
     Keyboard.addListener('keyboardDidShow',(frames)=>{
       const run = `
