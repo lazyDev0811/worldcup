@@ -36,8 +36,7 @@ module.exports = function() {
       <p class="fade-in">LOADING...</p>
     </div>
   </div>
-    <div id="merch-container" style="width:100%">
-    
+    <div id="merch-container" style="width:100%">  
     </div>
     <script type="application/javascript">
 

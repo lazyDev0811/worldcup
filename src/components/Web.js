@@ -314,38 +314,25 @@ class Web extends React.Component {
         //self.sendMessage(JSON.stringify([layoutId,container, layoutHtml]));
       },
       startTransition: function() {
-
-
         //determine last element
         var run =`
          setTimeout(() => {
            let loader = document.querySelector(".preloader");
-           
-           function removeLdr() {
-              loader.style.zIndex= "9999999999";
-              loader.classList.toggle("fade-out");
-            }
-           removeLdr()
-         
-         },10);`
+           loader.style.display="";
+           loader.style.zIndex= "9999999999";
+           loader.classList.toggle("fade-out");
+         },100);`
         selfWeb.sendMessage(run);
       },
       endTransition: function() {
-
-
         //determine last element
         var run = `
          setTimeout(() => {
-       
-         let loader = document.querySelector(".preloader");
-         
-         function removeLdr() {
-            loader.style.zIndex= "0";
-            loader.classList.toggle("fade-in");
-          }
-         removeLdr()
-         
-         },250);`;
+          let loader = document.querySelector(".preloader");          
+          loader.classList.toggle("fade-in");
+          loader.style.display="none";
+          loader.style.zIndex= "0";                 
+         },300);`;
 
         selfWeb.sendMessage(run);
       },
