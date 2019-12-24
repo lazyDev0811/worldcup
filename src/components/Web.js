@@ -322,6 +322,7 @@ class Web extends React.Component {
            let loader = document.querySelector(".preloader");
            
            function removeLdr() {
+              loader.style.zIndex= "9999999999";
               loader.classList.toggle("fade-out");
             }
            removeLdr()
@@ -339,6 +340,7 @@ class Web extends React.Component {
          let loader = document.querySelector(".preloader");
          
          function removeLdr() {
+            loader.style.zIndex= "0";
             loader.classList.toggle("fade-in");
           }
          removeLdr()

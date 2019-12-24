@@ -250,7 +250,7 @@ class HomeScreen extends Component {
 
   render() {
     return (
-      <View>
+      <View style={{flex: 1}}>
         <StatusBar backgroundColor="white" barStyle="light-content" />
         <View style={styles.container}>{this.renderMain()}</View>
       </View>
