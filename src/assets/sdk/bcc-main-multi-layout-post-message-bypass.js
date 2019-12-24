@@ -558,7 +558,15 @@ bccLib = (function() {
     }
 
     // recieves the layout ref from sc-playback and renders the container to be used (finds the pattern container and renders the structure including the internal region references);
-    layoutcontainerMap[layoutId].patternContainer.innerHTML = layoutHtml;
+    try {
+
+        layoutcontainerMap[layoutId].patternContainer.innerHTML = layoutHtml;
+
+    } catch(e) {
+        debugger;
+        console.log('error assinging layout:'+layoutId+ 'container'+ containerVal);
+
+    }
   }
 
   /**

@@ -58,10 +58,12 @@ class HomeScreen extends Component {
   }
   _handleAppStateChange(nextAppState) {
     debugger;
+    console.log('nextAppState:'+ nextAppState)
     if (
         this.state.appState.match(/inactive|background/) &&
         nextAppState === 'active'
     ) {
+      console.log('app state handler from inactive to active');
       alert('home: app went to foreground');
       this.onLogoutPress();
 
@@ -71,6 +73,8 @@ class HomeScreen extends Component {
       //   console.log(err);
       // });
 
+    }else {
+      debugger;
     }
   }
 

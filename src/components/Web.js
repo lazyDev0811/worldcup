@@ -14,7 +14,8 @@ import {
   configIOS,
   configAndriod,
   configShared,
-  resetNavigation, callNumber,
+  resetNavigation,
+  callNumber,
 } from '../utils/Helper';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -329,7 +330,10 @@ class Web extends React.Component {
         var run = `
          setTimeout(() => {
           let loader = document.querySelector(".preloader");          
-          loader.classList.toggle("fade-in");
+          try {
+          
+          loader.classList.remove("fade-out");
+          }catch(e){}
           loader.style.display="none";
           loader.style.zIndex= "0";                 
          },300);`;
@@ -394,13 +398,13 @@ class Web extends React.Component {
     AppState.removeEventListener('change', () => this._handleAppStateChange);
   }
   _handleAppStateChange(nextAppState) {
-
-    debugger;
+    console.log('WEb nextAppState:'+ nextAppState);
+    // AsyncStorage.set('appState', nextAppState);
     if (
       this.state.appState.match(/inactive|background/) &&
       nextAppState === 'active'
     ) {
-      alert('app went to foreground');
+      //alert('app went to foreground');
 
       let key = this.state.key;
       this.setState({key: key + 1});
@@ -426,7 +430,7 @@ class Web extends React.Component {
   callNumber = data => {
 
     debugger;
-    alert('calling number');
+    // alert('calling number');
     const number =
       data && data.callNumber
         ? data.callNumber
@@ -452,7 +456,7 @@ class Web extends React.Component {
       const accessToken = await AsyncStorage.getItem('accessToken');
       //debugger;
       if (!accessToken) {
-        alert('no access token');
+        // alert('no access token');
         return false;
       } else {
         console.log(accessToken);
@@ -468,7 +472,7 @@ class Web extends React.Component {
       }
     } catch (err) {
       debugger;
-      alert(err);
+      //alert(err);
     }
 
     let self = this;
@@ -676,7 +680,7 @@ class Web extends React.Component {
   init() {
     this.getToken((err, token) => {
       if (err) {
-        alert('Please login again');
+        alert('Please restart the app');
         //TODO: go back, navigate to login
 
         return;
@@ -748,7 +752,7 @@ class Web extends React.Component {
     let value = await AsyncStorage.getItem(url);
 
     let resp = null;
-    debugger;
+
     try {
       resp = JSON.parse(value);
     } catch (e) {
@@ -865,7 +869,7 @@ class Web extends React.Component {
           callback(new Error('could not load'));
         } else {
           self.bcloaded = true;
-          debugger;
+
 
           //ep = '234707';
 
