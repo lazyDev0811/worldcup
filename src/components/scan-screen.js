@@ -35,7 +35,7 @@ class ScanScreen extends Component {
 
     Alert.alert(
         'QR Camera',
-        'Cancelling will stop your current transaction',
+        'Cancelling will required you to manually enter the information',
         [
           {text: 'OK', onPress: () => {
               this.props.navigation.state.params.onCodeCapture(null, passThroughData, parentRef);

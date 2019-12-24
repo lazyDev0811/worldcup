@@ -2494,7 +2494,8 @@ dexit.BccVM = function(params) {
       //if targetRegion is already an image node then replace it
       if (targetRegion.nodeName === 'IMG') {
         targetRegion.src = multimedia.mediaPath;
-
+        targetRegion.classList.add("fade-in");
+        // targetRegion.classList.add('fade-in')
         if (presentationStyle) {
           //also add visibility:visible
           //$(targetRegion).css(presentationStyle + ';visbility:visible');
@@ -2510,6 +2511,7 @@ dexit.BccVM = function(params) {
         var newImg = document.createElement('img');
         newImg.src = multimedia.mediaPath;
         newImg.classList.add('img-responsive');
+        newImg.classList.add("fade-in");
 
         if (presentationStyle) {
           $(newImg).css(presentationStyle);

@@ -5,7 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform, AppState,
+  Platform,
+  AppState,
+    StatusBar,
 } from 'react-native';
 import RNRestart from 'react-native-restart';
 import {NavigationActions, StackActions} from 'react-navigation';
@@ -247,7 +249,13 @@ class HomeScreen extends Component {
   }
 
   render() {
-    return <View style={styles.container}>{this.renderMain()}</View>;
+    return (
+      <View>
+        <StatusBar backgroundColor="white" barStyle="light-content" />
+        <View style={styles.container}>{this.renderMain()}</View>
+      </View>
+    );
+    // return <View style={styles.container}>{this.renderMain()}</View>;
   }
 }
 
