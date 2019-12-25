@@ -46,7 +46,7 @@ import _ from 'lodash';
 //import DexSDK from '../assets/sdk/dex-sdk-shim';
 let accessToken = '';
 
-const html = require('./ep-home')();
+const html = require('./ep-home2')();
 
 class Web extends React.Component {
   constructor(props) {
@@ -316,36 +316,48 @@ class Web extends React.Component {
       },
       startTransition: function() {
         //determine last element
-        var run =`
-         setTimeout(() => {
-           let loader = document.querySelector(".preloader");
-           loader.style.display="";
-           loader.style.zIndex= "9999999999";
-           loader.classList.toggle("fade-out");
-         },100);`
-        selfWeb.sendMessage(run);
+        // var run =`
+        //  setTimeout(() => {
+        //    let loader = document.querySelector(".preloader");
+        //    loader.style.display="";
+        //    loader.style.zIndex= "9999999999";
+        //    loader.classList.toggle("fad   e-out");
+        //  },100);`
+        // selfWeb.sendMessage(run);
       },
-      endTransition: function() {
+      endTransition: function(data) {
         //determine last element
+        debugger;
+        var epId = data.epId;
+        var layoutId = data.layout[0];
+
+
+        var ref = '#ep___' + epId + '___' + layoutId;
+
         var run = `
          setTimeout(() => {
-          let loader = document.querySelector(".preloader");          
-          try {
+          let loader = document.querySelector("${ref}");  
           
-          loader.classList.remove("fade-out");
+          let active = document.querySelector("active-campaign");          
+          try {
+          if (loader) {
+            loader.classList.toggle("slidein");
+          
+            active.classList.toggle("active-campaign");
+        
+            loader.classList.toggle("active-campaign");
+          
+          
+          }
           }catch(e){}
-          loader.style.display="none";
-          loader.style.zIndex= "0";                 
+                      
          },300);`;
 
         selfWeb.sendMessage(run);
       },
 
+
     }; //end bcc-lib
-
-
-
-
 
     Keyboard.addListener('keyboardDidShow',(frames)=>{
       const run = `
@@ -354,8 +366,7 @@ class Web extends React.Component {
             }, 10);
             `;
       selfWeb.sendMessage(run);
-    })
-    ;
+    });
     Keyboard.addListener('keyboardDidHide',(frames)=>{
 
       const run = `
@@ -365,8 +376,6 @@ class Web extends React.Component {
             `;
       selfWeb.sendMessage(run);
     });
-
-
   }
 
   // componentDidMount() {
@@ -394,26 +403,57 @@ class Web extends React.Component {
     AppState.addEventListener('change', () => this._handleAppStateChange);
   }
 
+  _storeAppData = async (appState) => {
+    try {
+      await AsyncStorage.setItem('appState', appState);
+      console.log("done storing");
+    } catch (error) {
+      console.log(error);
+    }};
+
   componentWillUnmount() {
     AppState.removeEventListener('change', () => this._handleAppStateChange);
+    dexit.device.sdk.unload(err => {
+      debugger
+      if (err) {
+        console.log('warning error unloading');
+      }
+    });
+
   }
-  _handleAppStateChange(nextAppState) {
-    console.log('WEb nextAppState:'+ nextAppState);
+  async _handleAppStateChange(nextAppState) {
+    debugger;
+    console.log('WEb nextAppState:' + nextAppState);
+    alert(nextAppState);
     // AsyncStorage.set('appState', nextAppState);
-    if (
-      this.state.appState.match(/inactive|background/) &&
-      nextAppState === 'active'
-    ) {
-      //alert('app went to foreground');
 
-      let key = this.state.key;
-      this.setState({key: key + 1});
-      // self.loadPortal(self.tpId, '', function(err) {
-      //   console.log(err);
-      // });
-
+    if (nextAppState === 'background' || nextAppState === 'inactive') {
+      //save state before loading
+      this._storeAppData(nextAppState);
     }
-    this.setState({appState: nextAppState});
+
+    try {
+      let appState = await AsyncStorage.getItem('appState');
+
+      if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === 'active'
+      ) {
+        //alert('app went to foreground');
+        let key = this.state.key;
+        this.setState({key: key + 1});
+        // self.loadPortal(self.tpId, '', function(err) {
+        //   console.log(err);
+        // });
+
+      }
+    }catch(e) {
+      debugger;
+      console.log('error');
+    }
+    this._storeAppData(nextAppState);
+
+    //this.setState({appState: nextAppState});
   }
 
   // componentWillMount() {
