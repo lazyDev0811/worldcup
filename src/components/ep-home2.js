@@ -53,7 +53,7 @@ module.exports = function() {
             
             .active-campaign {
               z-index: 9999999;
-              top: 20px;
+              top: 0;
               position: absolute;
               background: white;
             }
@@ -72,15 +72,10 @@ module.exports = function() {
 <!--    </div>-->
 <!--  </div>-->
 
-<div class="main-containers">
+<div class="main-containers" style="position: fixed;top: 0;">
     <div id="main-container1" class="main-container2" style="width: 100%">
     
     </div>
-    
-    <div id="main-container2" class="main-container2" style="width: 100%">
-    
-    </div>
-    
 </div>
 
 <!--    <div id="merch-container" style="width:100%">  -->

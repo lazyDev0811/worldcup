@@ -347,6 +347,9 @@ class Web extends React.Component {
         
             loader.classList.toggle("active-campaign");
           
+            try {
+            active.classList.remove("slidein");
+          }catch(e){}
           
           }
           }catch(e){}
