@@ -65,17 +65,10 @@ module.exports = function() {
 <!--    <H1> running..</H1>-->
     <div class="status"></div>
     
-<!--   <div id="tog" class="con fade-in fade-out">-->
-<!--    <div class="preloader">-->
-<!--      <img src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/images/spinner.svg" alt="spinner">-->
-<!--      <p class="fade-in">LOADING...</p>-->
-<!--    </div>-->
-<!--  </div>-->
 
 <div class="main-containers" style="position: fixed;top: 0;">
-    <div id="main-container1" class="main-container2" style="width: 100%">
-    
-    </div>
+<!--    <div id="main-container1" class="main-container2 slidein" style="width: 100%">   -->
+<!--    </div>-->
 </div>
 
 <!--    <div id="merch-container" style="width:100%">  -->
