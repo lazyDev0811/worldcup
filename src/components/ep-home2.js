@@ -51,7 +51,7 @@ module.exports = function() {
                 }
             }    
             
-            .active-campaign {
+            .activecampaign {
               z-index: 9999999;
               top: 0;
               position: absolute;
@@ -258,14 +258,11 @@ module.exports = function() {
             debugger;
             console.log('keyboard shown');
             jQuery('div.bottom-menu').attr('hidden',true);
-
         }
         
         function keyboardHidden() {
-            
             console.log('keyboard hidden');
             jQuery('div.bottom-menu').removeAttr('hidden');
-    
         }
         
     </script>

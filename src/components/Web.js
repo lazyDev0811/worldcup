@@ -337,22 +337,29 @@ class Web extends React.Component {
         var run = `
          setTimeout(() => {
           let loader = document.querySelector("${ref}");  
-          
-          let active = document.querySelector("active-campaign");          
+          let active = document.querySelector(".activecampaign");
+          let containers = document.querySelectorAll(".main-container2")
           try {
-          if (loader) {
-            loader.classList.toggle("slidein");
-          
-            active.classList.toggle("active-campaign");
-        
-            loader.classList.toggle("active-campaign");
-          
-            try {
-            active.classList.remove("slidein");
+              
+            if (active) {
+                active.classList.remove("activecampaign");
+                active.classList.remove("slidein");
+            }
+       
+            if (loader) {
+              loader.classList.toggle("slidein");
+              
+              //first one does not have active campaign
+              if (containers.length > 1) {
+                loader.classList.toggle("activecampaign");
+              }
+            }
+            
+            
           }catch(e){}
           
-          }
-          }catch(e){}
+           
+          
                       
          },300);`;
 
