@@ -337,18 +337,22 @@ class Web extends React.Component {
         var run = `
          setTimeout(() => {
           let loader = document.querySelector("${ref}");  
-          
-                
+          let active = document.querySelector(".activecampaign");
+          let containers = document.querySelectorAll(".main-container2")
           try {
-            let active = document.querySelector(".activecampaign");  
+              
             if (active) {
-                active.classList.toggle("activecampaign");
+                active.classList.remove("activecampaign");
                 active.classList.remove("slidein");
             }
        
             if (loader) {
               loader.classList.toggle("slidein");
-              loader.classList.toggle("activecampaign");
+              
+              //first one does not have active campaign
+              if (containers.length > 1) {
+                loader.classList.toggle("activecampaign");
+              }
             }
             
             
