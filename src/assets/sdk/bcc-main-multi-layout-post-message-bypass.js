@@ -2335,8 +2335,16 @@ dexit.BccVM = function(params) {
       referenceId,
       presentationStyle,
   ) {
-    var mainContainer = self.container,
-        targetRegion = mainContainer.querySelector(
+    var mainContainer = self.container;
+
+    if (!mainContainer) {
+        console.log('something wrong with putting mm in region:'+region+' pattern:' + JSON.stringify(multimedia));
+        debugger;
+        return;
+    }
+
+
+    var targetRegion = mainContainer.querySelector(
             '[data-region="' + region + '"]',
         ),
         interStitial = document.createElement('div');
