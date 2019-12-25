@@ -351,7 +351,7 @@ class Web extends React.Component {
               
             }
             if (active) {
-                // active.classList.remove("activecampaign");
+                active.classList.remove("activecampaign");
                 active.classList.remove("slidein");
             }
 
