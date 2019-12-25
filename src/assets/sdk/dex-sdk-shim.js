@@ -10079,16 +10079,38 @@ dexit.ExecutionManager = function(config,stateStorage, scManager, pubSub) {
         //self.stateStorage.setElementStateInfo();
         var data = dat.element;
         var scId = (dat.scId ? dat.scId : data.scId);
+        var doNotSuspend = (dat.doNotSuspend ? dat.doNotSuspend : false);
 
         self.stateStorage.init(data.epId,scId,self.deviceId,self.channelId,dexit.device.sdk.getUser(),dexit.device.sdk.getTouchpoint().touchpoint,data.instanceTime);
         var params = (data && data.previousElement && data.previousElement.id ? {previousElementId: data.previousElement.id} : {});
 
         self.stateStorage.setElementStateInfo(data.currentElement,'click',_.extend(params,data.intelligence));
         //self.stateStorage.setElementStateInfo(data.currentElement,'suspend');
-        //call suspend
+        //call suspend //try to not call suspend to fix issue....
         self.suspend(data.epId,data.currentElement.id);
 
+
+        // //suspend the current pattern
+        // dexit.device.sdk.getExecutionManager().stop({id:data.epId});
+        // dexit.device.sdk.unloadEngagementPattern(data.epId, function(err, res) {
+        //     debugger;
+        //
+        // })
+
+        //load in a new screen
         self.pubSub.publish('dexit.ep.go', dat);
+
+        //one done,
+
+
+
+
+        // epHandler.unloadEngagementPattern(params.epId, function(err, res) {
+        //
+        // });
+
+
+
         // if (data && data.element && data.element.intelligence) {
         //     //1: unload current EP (data.element.epId), and wait
         //     //2: load new element
@@ -10488,7 +10510,7 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
                         if (counter < 1 && dexit.device.sdk.getParentRef()) {
                             setTimeout(function () {
                                 dexit.device.sdk.getParentRef().hideLoadingIndicator();
-                                dexit.device.sdk.presentationMng.plugin.endTransition();
+                                dexit.device.sdk.presentationMng.plugin.endTransition(data);
                             }, 900);
                         }
 
@@ -11874,7 +11896,12 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                 if (err) { //for now just retrieve the whole layout and get the container reference
                     return callback(err);
                 }
-                var container = layout.container;
+
+                debugger;
+                //need to determine parent's container
+                var container = data.layoutRef;
+
+                //var container = layout.container;
 
                 //intelResult
 
@@ -11925,7 +11952,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
             //
             //
 
-            PubSub.publish('dexit.ep.show',{ element:element, scId: scId});
+            PubSub.publish('dexit.ep.show',{ element:element, scId: scId, doNotSuspend:true});
             callback(null, {skip:true});
            // // var this = this;
            //
@@ -12408,6 +12435,8 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
     };
 
 
+
+
     /**
      *
      * @param {object} data
@@ -12445,9 +12474,19 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                 } else {
                     var decoded = self._base64Decode(layout.content);
 
+                    var containerRef;
 
+                    if (data.overrideContainer) {
+                        containerRef = (data.overrideContainer);
+                    } else {
+                        containerRef = "ep___" +  data.epId + '___' + data.layout[0];
+                    }
+
+
+                    // var container = "main-container1" ||  layout.container;
+                    // var containerRef = (data.overrideContainer ? data.overrideContainer : container);
                     //if data.overrideContainer
-                    var containerRef = (data.overrideContainer ? data.overrideContainer : layout.container);
+                    // var containerRef = (data.overrideContainer ? data.overrideContainer : layout.container);
 
 
                     //Make masterContainer a composite of epId + revision + layout.id

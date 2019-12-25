@@ -14,7 +14,8 @@ import {
   configIOS,
   configAndriod,
   configShared,
-  resetNavigation, callNumber,
+  resetNavigation,
+  callNumber,
 } from '../utils/Helper';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -45,7 +46,7 @@ import _ from 'lodash';
 //import DexSDK from '../assets/sdk/dex-sdk-shim';
 let accessToken = '';
 
-const html = require('./ep-home')();
+const html = require('./ep-home2')();
 
 class Web extends React.Component {
   constructor(props) {
@@ -315,33 +316,48 @@ class Web extends React.Component {
       },
       startTransition: function() {
         //determine last element
-        var run =`
-         setTimeout(() => {
-           let loader = document.querySelector(".preloader");
-           loader.style.display="";
-           loader.style.zIndex= "9999999999";
-           loader.classList.toggle("fade-out");
-         },100);`
-        selfWeb.sendMessage(run);
+        // var run =`
+        //  setTimeout(() => {
+        //    let loader = document.querySelector(".preloader");
+        //    loader.style.display="";
+        //    loader.style.zIndex= "9999999999";
+        //    loader.classList.toggle("fad   e-out");
+        //  },100);`
+        // selfWeb.sendMessage(run);
       },
-      endTransition: function() {
+      endTransition: function(data) {
         //determine last element
+        debugger;
+        var epId = data.epId;
+        var layoutId = data.layout[0];
+
+
+        var ref = '#ep___' + epId + '___' + layoutId;
+
         var run = `
          setTimeout(() => {
-          let loader = document.querySelector(".preloader");          
-          loader.classList.toggle("fade-in");
-          loader.style.display="none";
-          loader.style.zIndex= "0";                 
+          let loader = document.querySelector("${ref}");  
+          
+          let active = document.querySelector("active-campaign");          
+          try {
+          if (loader) {
+            loader.classList.toggle("slidein");
+          
+            active.classList.toggle("active-campaign");
+        
+            loader.classList.toggle("active-campaign");
+          
+          
+          }
+          }catch(e){}
+                      
          },300);`;
 
         selfWeb.sendMessage(run);
       },
 
+
     }; //end bcc-lib
-
-
-
-
 
     Keyboard.addListener('keyboardDidShow',(frames)=>{
       const run = `
@@ -350,9 +366,8 @@ class Web extends React.Component {
             }, 10);
             `;
       selfWeb.sendMessage(run);
-    })
-    ;
-    Keyboard.addListener('keyboardWillHide',(frames)=>{
+    });
+    Keyboard.addListener('keyboardDidHide',(frames)=>{
 
       const run = `
              setTimeout(() => {
@@ -361,8 +376,6 @@ class Web extends React.Component {
             `;
       selfWeb.sendMessage(run);
     });
-
-
   }
 
   // componentDidMount() {
@@ -390,26 +403,57 @@ class Web extends React.Component {
     AppState.addEventListener('change', () => this._handleAppStateChange);
   }
 
+  _storeAppData = async (appState) => {
+    try {
+      await AsyncStorage.setItem('appState', appState);
+      console.log("done storing");
+    } catch (error) {
+      console.log(error);
+    }};
+
   componentWillUnmount() {
     AppState.removeEventListener('change', () => this._handleAppStateChange);
+    dexit.device.sdk.unload(err => {
+      debugger
+      if (err) {
+        console.log('warning error unloading');
+      }
+    });
+
   }
-  _handleAppStateChange(nextAppState) {
-
+  async _handleAppStateChange(nextAppState) {
     debugger;
-    if (
-      this.state.appState.match(/inactive|background/) &&
-      nextAppState === 'active'
-    ) {
-      alert('app went to foreground');
+    console.log('WEb nextAppState:' + nextAppState);
+    alert(nextAppState);
+    // AsyncStorage.set('appState', nextAppState);
 
-      let key = this.state.key;
-      this.setState({key: key + 1});
-      // self.loadPortal(self.tpId, '', function(err) {
-      //   console.log(err);
-      // });
-
+    if (nextAppState === 'background' || nextAppState === 'inactive') {
+      //save state before loading
+      this._storeAppData(nextAppState);
     }
-    this.setState({appState: nextAppState});
+
+    try {
+      let appState = await AsyncStorage.getItem('appState');
+
+      if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === 'active'
+      ) {
+        //alert('app went to foreground');
+        let key = this.state.key;
+        this.setState({key: key + 1});
+        // self.loadPortal(self.tpId, '', function(err) {
+        //   console.log(err);
+        // });
+
+      }
+    }catch(e) {
+      debugger;
+      console.log('error');
+    }
+    this._storeAppData(nextAppState);
+
+    //this.setState({appState: nextAppState});
   }
 
   // componentWillMount() {
@@ -426,7 +470,7 @@ class Web extends React.Component {
   callNumber = data => {
 
     debugger;
-    alert('calling number');
+    // alert('calling number');
     const number =
       data && data.callNumber
         ? data.callNumber
@@ -452,7 +496,7 @@ class Web extends React.Component {
       const accessToken = await AsyncStorage.getItem('accessToken');
       //debugger;
       if (!accessToken) {
-        alert('no access token');
+        // alert('no access token');
         return false;
       } else {
         console.log(accessToken);
@@ -468,7 +512,7 @@ class Web extends React.Component {
       }
     } catch (err) {
       debugger;
-      alert(err);
+      //alert(err);
     }
 
     let self = this;
@@ -676,7 +720,7 @@ class Web extends React.Component {
   init() {
     this.getToken((err, token) => {
       if (err) {
-        alert('Please login again');
+        alert('Please restart the app');
         //TODO: go back, navigate to login
 
         return;
@@ -748,7 +792,7 @@ class Web extends React.Component {
     let value = await AsyncStorage.getItem(url);
 
     let resp = null;
-    debugger;
+
     try {
       resp = JSON.parse(value);
     } catch (e) {
@@ -865,7 +909,7 @@ class Web extends React.Component {
           callback(new Error('could not load'));
         } else {
           self.bcloaded = true;
-          debugger;
+
 
           //ep = '234707';
 

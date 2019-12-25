@@ -71,7 +71,7 @@ JSONForm.fieldTypes['totalAmount'] = jQuery.extend(true, {}, JSONForm.fieldTypes
             <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"><%=  value %></span>
         </div>`;
 // template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
-JSONForm.fieldTypes['totalAmount'].onInsert =function (data, node) {
+JSONForm.fieldTypes['totalAmount'].onInsert = function (data, node) {
   // Compute the value of "myvalue" here
   if (totalAmountTimer) {
     clearInterval(totalAmountTimer);
@@ -546,6 +546,21 @@ bccLib = (function() {
       throw new Error('Layout must have a container');
     }
 
+    //does container have [...if so then its embeded so skip
+      var exist = document.querySelector('#' + containerVal);
+
+    if (containerVal.indexOf('[') === -1) {
+        if (!exist) {
+            $('.main-containers').append('<div id="'+ container +'" class="main-container2"><div>');
+            exist = document.querySelector('#' + container);
+        }
+    }
+
+    if (!exist) {
+        console.log('warning...no suitable layout container');
+    }
+
+
     if (!layoutcontainerMap[layoutId]) {
       layoutcontainerMap[layoutId] = {};
     }
@@ -558,7 +573,15 @@ bccLib = (function() {
     }
 
     // recieves the layout ref from sc-playback and renders the container to be used (finds the pattern container and renders the structure including the internal region references);
-    layoutcontainerMap[layoutId].patternContainer.innerHTML = layoutHtml;
+    try {
+
+        layoutcontainerMap[layoutId].patternContainer.innerHTML = layoutHtml;
+
+    } catch(e) {
+        debugger;
+        console.log('error assinging layout:'+layoutId+ ' forcontainer'+ containerVal + '...likely patternContainer is undefined');
+
+    }
   }
 
   /**

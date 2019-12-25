@@ -11,7 +11,7 @@ module.exports = function() {
     
     <!-- loader icon -->
     
-    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">
+<!--    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
     <link href="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/ucc/0.3.23/assets/style/ucc-main.css" rel="stylesheet">
 <!--    <link rel="stylesheet" href="https://releases.dexit.co/dex-css-master/0.0.40/ice4m_main.css">-->
@@ -24,20 +24,67 @@ module.exports = function() {
        body {font-family: 'Lato', sans-serif; background: #FFFFFF;}
     </style>
     
+    
+    <style>
+    
+            
+           .main-container2 {
+                position: relative;
+                left: 511px;  
+                background: white;
+            }
+            
+            .con {
+                /*width: 414px;*/
+                /*height: 510px;*/
+                /*background: #ccc;*/
+                /*z-index: 99;*/
+            }
+            
+            .slidein {
+                animation: slidein ease 1s forwards;
+            }
+            
+            @keyframes slidein {
+                100% {
+                    left: 0px;
+                }
+            }    
+            
+            .active-campaign {
+              z-index: 9999999;
+              top: 20px;
+              position: absolute;
+              background: white;
+            }
+    
+    </style>
 
 </head>
 <body>
 <!--    <H1> running..</H1>-->
     <div class="status"></div>
     
-   <div id="tog" class="con fade-in fade-out">
-    <div class="preloader">
-      <img src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/images/spinner.svg" alt="spinner">
-      <p class="fade-in">LOADING...</p>
+<!--   <div id="tog" class="con fade-in fade-out">-->
+<!--    <div class="preloader">-->
+<!--      <img src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/images/spinner.svg" alt="spinner">-->
+<!--      <p class="fade-in">LOADING...</p>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<div class="main-containers">
+    <div id="main-container1" class="main-container2" style="width: 100%">
+    
     </div>
-  </div>
-    <div id="merch-container" style="width:100%">  
+    
+    <div id="main-container2" class="main-container2" style="width: 100%">
+    
     </div>
+    
+</div>
+
+<!--    <div id="merch-container" style="width:100%">  -->
+<!--    </div>-->
     <script type="application/javascript">
 
         // Create Base64 Object
@@ -192,7 +239,7 @@ module.exports = function() {
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.3/async.min.js"></script>
     
-    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.2/bcc-main-multi-layout-post-message-bypass.js"></script>
+    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.3/bcc-main-multi-layout-post-message-bypass.js"></script>
     
 <!--    <script src="https://3pa.cdnedge.bluemix.net/ajax/libs/video.js/6.3.3/video.js"></script>-->
 <!--    <script src="https://releases.dexit.co/bcc-presentation-react/main.js"></script>-->
