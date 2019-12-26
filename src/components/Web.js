@@ -1373,7 +1373,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(226,120,44,0.4)',
   },
   CameraViewIndicator: {
     position: 'absolute',
