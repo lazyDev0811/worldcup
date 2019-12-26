@@ -27,11 +27,22 @@ module.exports = function() {
     
     <style>
     
+           .hidden {
+            display:none;
+           }
+           .banner-wrapper {
+            max-height: 296px;
+           }
+           
+           
+           
             
            .main-container2 {
                 position: relative;
                 left: 511px;  
                 background: white;
+                display: none;
+                /*height:0;*/
             }
             
             .con {
@@ -42,7 +53,9 @@ module.exports = function() {
             }
             
             .slidein {
-                animation: slidein ease 1s forwards;
+                animation: slidein ease 500ms forwards;
+                display: block;
+                /*height: auto;*/
             }
             
             @keyframes slidein {
@@ -54,8 +67,9 @@ module.exports = function() {
             .activecampaign {
               z-index: 9999999;
               top: 0;
-              position: absolute;
+              position: relative;
               background: white;
+              
             }
     
     </style>
@@ -66,9 +80,10 @@ module.exports = function() {
     <div class="status"></div>
     
 
-<div class="main-containers" style="position: fixed;top: 0;">
+<!--<div class="main-containers" style="position: fixed;top: 0;">-->
 <!--    <div id="main-container1" class="main-container2 slidein" style="width: 100%">   -->
 <!--    </div>-->
+<div class="main-containers" style="top: 0; position: relative;overflow-x: hidden;">
 </div>
 
 <!--    <div id="merch-container" style="width:100%">  -->
