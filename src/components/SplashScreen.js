@@ -134,7 +134,7 @@ class SplashScreen extends React.Component {
         <View stype={styles.logoCircle}>
           <Image
             style={styles.logo}
-            source={require('../assets/icons/ic_logo.png')}
+            source={require('../assets/icons/big_logo.png')}
           />
         </View>
       </View>
@@ -144,7 +144,8 @@ class SplashScreen extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#142550',
+    //backgroundColor: '#142550',
+    backgroundColor: '#e2782c',
     flex: 1,
     justifyContent: 'center',
   },

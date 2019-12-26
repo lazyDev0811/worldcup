@@ -38,7 +38,7 @@ JSONForm.fieldTypes['title'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help
 JSONForm.fieldTypes['totalAmountReceipt'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
 JSONForm.fieldTypes['totalAmountReceipt'].template = `<div id="" class="margin-bottom-10 balance-value"><div class="recpt-title">
 <span class="float-left">Top-up Amount</span>
-<span total-amount="amount" class="green float-right" style="margin-left: 18%;">15</span>
+<span total-amount="amount" class="green float-right" style="margin-left: 18%;"></span>
 </div></div>`;
 
 var totalAmountReceiptTimer = null;
@@ -68,7 +68,7 @@ JSONForm.fieldTypes['totalAmount'] = jQuery.extend(true, {}, JSONForm.fieldTypes
     //         <span total-amount="amount" class="amunt"><%= value %></span>
     //     </div>`;
     JSONForm.fieldTypes['totalAmount'].template =`<div id="<%= id %>" class="margin-bottom-10 balance-value">
-            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"><%=  value %></span>
+            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"></span>
         </div>`;
 // template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
 JSONForm.fieldTypes['totalAmount'].onInsert = function (data, node) {
@@ -93,7 +93,7 @@ JSONForm.fieldTypes['totalAmount'].onInsert = function (data, node) {
 
     JSONForm.fieldTypes['totalAmountMine'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
     JSONForm.fieldTypes['totalAmountMine'].template =`<div id="<%= id %>" class="margin-bottom-10 balance-value">
-            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"><%=  value %></span>
+            <span><%= elt.title2 %> &nbsp; <span/><span total-amount="amount" class="green"></span>
         </div>`;
     JSONForm.fieldTypes['totalAmountMine'].onInsert =function (data, node) {
     // Compute the value of "myvalue" here

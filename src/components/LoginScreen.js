@@ -130,7 +130,7 @@ class LoginScreen extends React.Component {
                 <View style={styles.logoCircle}>
                     <Image
                         style={styles.logo}
-                        source={require('../assets/icons/ic_logo.png')}
+                        source={require('../assets/icons/big_logo.png')}
                     />
                 </View>
 
@@ -176,7 +176,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         //backgroundColor: '#f9fbfd',
-        backgroundColor: '#142550',
+        // backgroundColor: '#142550',
+        backgroundColor: '#e2782c',
         padding: 4,
         justifyContent: 'center',
         alignItems: 'center'
@@ -202,20 +203,23 @@ const styles = StyleSheet.create({
 
     loginView: {
         //backgroundColor: '#57a9ea',
-        backgroundColor: '#142550',
+        // backgroundColor: '#142550',
+        backgroundColor: '#fafdff',
         borderRadius: 8,
         paddingTop: 10,
         paddingBottom: 10,
         width: wp('90%'),
         margin: 8,
-        borderWidth: 1,
+        borderWidth: 2,
         alignItems: 'center',
-        borderColor: 'white',
+        borderColor: '#73b744',
     },
 
     loginText: {
-        color: 'white',
-        fontSize: 16
+        fontFamily:'poppins',
+        color: '#4b515c',
+        fontSize: 17,
+        fontWeight: 'bold',
     },
     logoCircle: {
         width:  wp('45%'),

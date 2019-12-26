@@ -334,7 +334,7 @@ class Web extends React.Component {
 
         var ref = '#ep___' + epId + '___' + layoutId;
 
-        if (data.overrideContainer && data.overrideContainer.indexOf('[data-region') != -1) {
+        if (data && data.overrideContainer && data.overrideContainer.indexOf('[data-region') != -1) {
           return;
         }
 
@@ -390,10 +390,12 @@ class Web extends React.Component {
             console.log('error adding transition');
 
           }
+          
+          
+          window.scrollTo(0, 0);
          
                       
          },300);`;
-
 
         //
         //  if (loader) {
@@ -432,7 +434,7 @@ class Web extends React.Component {
         //   console.log(e);
         // }
 
-        console.log('running:'+run);
+        console.log('running:'+run)
 
 
 

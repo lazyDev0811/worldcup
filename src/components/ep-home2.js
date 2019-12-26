@@ -11,7 +11,7 @@ module.exports = function() {
     
     <!-- loader icon -->
     
-<!--    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">-->
+    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
     <link href="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/ucc/0.3.23/assets/style/ucc-main.css" rel="stylesheet">
 <!--    <link rel="stylesheet" href="https://releases.dexit.co/dex-css-master/0.0.40/ice4m_main.css">-->
@@ -32,6 +32,7 @@ module.exports = function() {
            }
            .banner-wrapper {
             max-height: 296px;
+            box-shadow: none;
            }
            
            
@@ -53,7 +54,7 @@ module.exports = function() {
             }
             
             .slidein {
-                animation: slidein ease 500ms forwards;
+                animation: slidein ease 400ms forwards;
                 display: block;
                 /*height: auto;*/
             }
