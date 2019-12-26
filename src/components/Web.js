@@ -330,40 +330,113 @@ class Web extends React.Component {
         debugger;
         var epId = data.epId;
         var layoutId = data.layout[0];
-
+        console.log(JSON.stringify(data));
 
         var ref = '#ep___' + epId + '___' + layoutId;
+
+        if (data && data.overrideContainer && data.overrideContainer.indexOf('[data-region') != -1) {
+          return;
+        }
+
+        debugger;
+
+
+        //ignore repeats
 
         var run = `
          setTimeout(() => {
           debugger;
-         
-          let loader = document.querySelector("${ref}");  
-          let active = document.querySelector(".activecampaign");
-          let len = document.querySelectorAll(".main-container2").length
+          console.log('adding transition for ${ref}');
           try {
-              
-            
-            if (loader) {
-              loader.classList.toggle("slidein");
-              loader.classList.toggle("activecampaign", len > 1);
-              
-              
-            }
-            if (active) {
-                active.classList.remove("activecampaign");
-                active.classList.remove("slidein");
+          let loader = document.querySelector("${ref}");
+            if (loader && loader.classList.contains("slidein")) {
+              return;
+            } else {
+
+
+
+              let containers = document.querySelectorAll(".main-container2");
+              let len = containers.length;
+  
+              var i;
+              for (i = 0; i < containers.length; i++) {
+                let curr = containers[i];
+                console.log(curr.id);
+                curr.classList.remove("slidein");
+                curr.classList.remove("activecampaign");
+              }
+  
+  
+  
+              if (loader) {
+                if (!loader.classList.contains("slidein")) {
+                  loader.classList.add("slidein");
+                }else {
+                  console.log("loader already containers slidein");
+                }
+  
+                if (!loader.classList.contains("activecampaign") && len > 1) {
+                  loader.classList.add("activecampaign");
+                } else {
+                  console.log("loader already containers activecampaign");
+                }
+              } else {
+                console.log('no active campaign');
+              }
+  
             }
 
-           
-                   
-            
-          }catch(e){
-            console.log(e);
+          }catch(e) {
+            console.log('error adding transition');
+
           }
           
+          
+          window.scrollTo(0, 0);
+         
                       
          },300);`;
+
+        //
+        //  if (loader) {
+        //
+        //     loader.classList.toggle("slidein");
+        //     loader.classList.toggle("activecampaign", len > 1);
+        //     console.log(loader)
+        //
+        //   }
+        //
+        // //remove everythign from dom
+        //
+        //
+        //
+        //
+        // let active = document.querySelector(".activecampaign");
+        // let len = document.querySelectorAll(".main-container2").length
+        //
+        //
+        // try {
+        //   if (active) {
+        //       // active.classList.remove("activecampaign");
+        //       // active.classList.remove("slidein");
+        //   }
+        //
+        //   if (loader) {
+        //     loader.classList.toggle("slidein");
+        //     loader.classList.toggle("activecampaign", len > 1);
+        //     console.log(loader)
+        //
+        //   }
+        //
+        //
+        //
+        // }catch(e){
+        //   console.log(e);
+        // }
+
+        console.log('running:'+run)
+
+
 
         selfWeb.sendMessage(run);
       },
@@ -1300,7 +1373,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(226,120,44,0.4)',
   },
   CameraViewIndicator: {
     position: 'absolute',

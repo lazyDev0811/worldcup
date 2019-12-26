@@ -11,7 +11,7 @@ module.exports = function() {
     
     <!-- loader icon -->
     
-<!--    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">-->
+    <link rel="stylesheet" href="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
     <link href="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/ucc/0.3.23/assets/style/ucc-main.css" rel="stylesheet">
 <!--    <link rel="stylesheet" href="https://releases.dexit.co/dex-css-master/0.0.40/ice4m_main.css">-->
@@ -27,11 +27,23 @@ module.exports = function() {
     
     <style>
     
+           .hidden {
+            display:none;
+           }
+           .banner-wrapper {
+            max-height: 296px;
+            box-shadow: none;
+           }
+           
+           
+           
             
            .main-container2 {
                 position: relative;
                 left: 511px;  
                 background: white;
+                display: none;
+                /*height:0;*/
             }
             
             .con {
@@ -42,7 +54,9 @@ module.exports = function() {
             }
             
             .slidein {
-                animation: slidein ease 1s forwards;
+                animation: slidein ease 400ms forwards;
+                display: block;
+                /*height: auto;*/
             }
             
             @keyframes slidein {
@@ -54,8 +68,9 @@ module.exports = function() {
             .activecampaign {
               z-index: 9999999;
               top: 0;
-              position: absolute;
+              position: relative;
               background: white;
+              
             }
     
     </style>
@@ -66,9 +81,10 @@ module.exports = function() {
     <div class="status"></div>
     
 
-<div class="main-containers" style="position: fixed;top: 0;">
+<!--<div class="main-containers" style="position: fixed;top: 0;">-->
 <!--    <div id="main-container1" class="main-container2 slidein" style="width: 100%">   -->
 <!--    </div>-->
+<div class="main-containers" style="top: 0; position: relative;overflow-x: hidden;">
 </div>
 
 <!--    <div id="merch-container" style="width:100%">  -->

@@ -11899,7 +11899,13 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
 
                 debugger;
                 //need to determine parent's container
-                var container = data.layoutRef;
+                //var container = data.layoutRef;
+
+                //parent container id is (ep___234744___cust-2b9cfc47-c228-4eee-a660-183c3da15121)
+
+                var container = 'ep___'+data.epId + '___' + data.layoutRef;
+
+
 
                 //var container = layout.container;
 
