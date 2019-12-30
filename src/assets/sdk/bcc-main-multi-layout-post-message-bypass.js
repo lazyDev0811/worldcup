@@ -57,7 +57,7 @@ JSONForm.fieldTypes['totalAmountReceipt'].onInsert =function (data, node) {
             $('span[total-amount="amount"]').text(sum);
         }
 
-    }, 2000);
+    }, 1000);
 };
 
 var totalAmountTimer = null;
@@ -186,6 +186,48 @@ JSONForm.fieldTypes['2Column'] = {
 };
 
 
+JSONForm.fieldTypes['balanceDifference'] = jQuery.extend(true, {}, JSONForm.fieldTypes['help']);
+
+var balanceDiffTimer = null;
+var threshold = 30;
+JSONForm.fieldTypes['balanceDifference'].template =`<div id="<%= id %>" balanceDifference="amount" style="display: none">
+        <div class="procceed-text"> <%= elt.helpvalue %></div></div>`;
+// template: '<span total-amount="true" id="<%=node.id%>"><%=value%></span>',
+JSONForm.fieldTypes['balanceDifference'].onInsert =function (data, node) {
+    // Compute the value of "myvalue" here
+    if (balanceDiffTimer) {
+        clearInterval(balanceDiffTimer);
+    }
+    balanceDiffTimer = setInterval(function() {
+
+        debugger;
+        var balance =$('[name="balance"]').val();
+
+        if (balance) {
+            var nBalance = parseFloat(balance);
+            if (nBalance < threshold ) {
+                $('[balanceDifference="amount"]').show();
+            } else {
+                $('[balanceDifference="amount"]').hide();
+            }
+        }
+    }, 2000);
+};
+
+
+function clearTimers() {
+
+    clearInterval(balanceCheckTimer);
+    clearInterval(totalAmountMineTimer);
+    clearInterval(totalAmountTimer);
+    clearInterval(totalAmountReceiptTimer);
+    clearInterval(balanceDiffTimer);
+
+
+}
+
+
+
 /**
  * Compiles a string into a jsonata expression object
  * TODO: improve performance by caching expressions
@@ -203,23 +245,25 @@ function getMappingExpression(mappingParams) {
 }
 
 async function sha256(message) {
+    //todos
+    return  message;
 
-    const encoder = new TextEncoder('utf-8');
-    // encode as UTF-8
-    const msgBuffer = encoder.encode(message);
-
-    // hash the message
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-
-    var u8 = new Uint8Array(hashBuffer);
-
-    // convert ArrayBuffer to Array
-    const hashArray = Array.from(u8);
-
-    const ctStr = hashArray.map(byte => String.fromCharCode(byte)).join('');             // ciphertext as string
-    const ctBase64 = btoa(ctStr);
-    console.log(ctBase64);
-    return ctBase64;
+    // const encoder = new TextEncoder('utf-8');
+    // // encode as UTF-8
+    // const msgBuffer = encoder.encode(message);
+    //
+    // // hash the message
+    // const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    //
+    // var u8 = new Uint8Array(hashBuffer);
+    //
+    // // convert ArrayBuffer to Array
+    // const hashArray = Array.from(u8);
+    //
+    // const ctStr = hashArray.map(byte => String.fromCharCode(byte)).join('');             // ciphertext as string
+    // const ctBase64 = btoa(ctStr);
+    // console.log(ctBase64);
+    // return ctBase64;
 }
 
 var mapFormFields = function(evt, form, previous) {
@@ -269,49 +313,54 @@ var tempData = {
             "transactionId":"460",
             "name":"Hart Yarrow",
             "date":"Dec 20 2019 12:01",
-            "transactionType":"Payment",
-            "amount":"10.50"
+            "transactionType":"Top Up",
+            "amount":"10.50",
+            "fees":"0"
         },
         {
             "transactionId":"456",
             "name":"Domenico Slixby",
             "date":"Nov 22 2019 12:01",
-            "transactionType":"Payment",
-            "amount":"22.20"
+            "transactionType":"Purchase",
+            "amount":"22.20",
+            "fees":"2.00"
         },
         {
             "transactionId":"459",
             "name":"John David",
             "date":"Sept 29 2019 12:01",
-            "transactionType":"Payment",
-            "amount":"10.00"
+            "transactionType":"Top Up",
+            "amount":"10.00",
+            "fees":"0"
         },
         {
             "transactionId":"458",
             "name":"Vlad Bow",
             "date":"Sept 10 2019 12:01",
             "transactionType":"Top Up",
-            "amount":"32.50"
+            "amount":"32.50",
+            "fees":"0"
         },
         {
             "transactionId":"457",
             "name":"Larry Kyle",
             "date":"Aug 29 2019 12:01",
-            "transactionType":"Payment",
-            "amount":"15.50"
+            "transactionType":"Purchase",
+            "amount":"15.50",
+            "fees":"1.50"
         },
         {
             "transactionId":"456",
             "name":"Kem Chris",
             "date":"Jul 30 2019 12:01",
-            "transactionType":"Payment",
+            "transactionType":"Purchase",
             "amount":"23.50"
         },
         {
         "transactionId":"123",
-        "name":"Tester S",
+        "name":"Service Center",
         "date":"Jul 29 2019 12:01",
-        "transactionType":"Top Up",
+        "transactionType":"Cashin",
         "amount":"10.22"
         }
     ],
@@ -861,7 +910,7 @@ bccLib = (function() {
               function() {
                 fetchNextElement(referenceId);
               },
-              false,
+              {capture: false, once:true},
           );
         }
       });
@@ -870,10 +919,14 @@ bccLib = (function() {
 
       $(newDiv).append(body.intelligence.presentation.html);
       var listener = function() {
-        var msg = {op: 'dexit.ep.show',  hasError: (false), data: { element:body, scId: bccVM.currentSCId()} };
+        var msg = {
+          op: 'dexit.ep.show',
+          hasError: false,
+          data: {element: body, scId: bccVM.currentSCId()},
+        };
         window.ReactNativeWebView.postMessage(JSON.stringify(msg));
       };
-      newDiv.addEventListener('click', listener, false);
+      newDiv.addEventListener('click', listener, {capture: false, once: true});
       //newDiv.addEventListener('click', function() { PubSub.publish('dexit.ep.show',{ element:body, scId: bccVM.currentSCId()}); }, false);
       $(newDiv).css({'cursor':'pointer'});
       targetRegion.appendChild(newDiv);
@@ -1343,6 +1396,37 @@ dexit.BccVM = function(params) {
         });
     };
 
+    self._checkPostRun = function(params, form, referenceId, values, cb) {
+
+
+        debugger;
+
+        var serviceDetails = params.serviceDetails;
+        var presentationMapping = serviceDetails.presentationMapping;
+        if (_.isString(presentationMapping)) {
+            presentationMapping = JSON.parse(presentationMapping);
+        }
+
+        if (presentationMapping && presentationMapping.postRun) {
+           // var callbackRef = 'preRun_' + referenceId;
+//            bccLib.setBehaviourMessageMap(callbackRef, cb);
+
+            let callbackRef = 'postRun_' + referenceId;
+            bccLib.setBehaviourMessageMap(callbackRef, cb);
+
+            var args =  presentationMapping.postRun.args;
+            var msg = {op: 'dexit.localfn',
+                hasError: (false),
+                data: {  values : values, value: presentationMapping.postRun.value, args: args, callbackRef: callbackRef } };
+            window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+        }else {
+
+
+            cb();
+        }
+    }
+
+
     self._checkPreRun = function(params, form, referenceId, isConfirm, values, cb) {
 
         var skipValidation = SKIP_VALIDATION;
@@ -1363,6 +1447,7 @@ dexit.BccVM = function(params) {
             inputModel = JSON.parse(inputModel);
         }
 
+        debugger;
         if (presentationMapping.preRun && presentationMapping.preRun.type && presentationMapping.preRun.type === 'autoSubmit') {
             var preRun = presentationMapping.preRun && presentationMapping.preRun;
 
@@ -1461,11 +1546,22 @@ dexit.BccVM = function(params) {
         var autoComplete = (presentationMapping && presentationMapping.autoComplete ? true : false);
 
 
+        var postRun = (presentationMapping && presentationMapping.postRun ? presentationMapping.postRun : null);
+
+
         if (!resultScreen) {
-            bccLib.fetchNextElement(referenceId);
+
+            if (postRun) {
+                self._checkPostRun(params,formElement,referenceId, values,function(err, res) {
+                    bccLib.fetchNextElement(referenceId);
+                });
+            }else {
+                bccLib.fetchNextElement(referenceId);
+            }
+
+
+
         }else {
-
-
 
             var inputModel = serviceDetails.completeModel || serviceDetails.inputModel;
             if (_.isString(inputModel)) {
@@ -1483,9 +1579,6 @@ dexit.BccVM = function(params) {
              */
             var formDefMod = self._prepareFormDef(formDef);
 
-
-
-
             self.clearDiv(formElement);
 
 
@@ -1499,14 +1592,25 @@ dexit.BccVM = function(params) {
 
                     //evt.preventDefault();
                     // presentation
-                    bccLib.fetchNextElement(referenceId);
+
+                    if (postRun) {
+                        self._checkPostRun(params,formElement,referenceId, values,function(err, res) {
+                            bccLib.fetchNextElement(referenceId);
+                        });
+                    }else {
+                        bccLib.fetchNextElement(referenceId);
+
+                    }
                     return false;
+                    // bccLib.fetchNextElement(referenceId);
+
                     //invoke behaviour
                     //save dadta
 
                     // }
                 }
             };
+            clearTimers();
             $(formElement).jsonForm(formDefinition);
 
             jQuery(".hover-home .form-group input").each(function() {
@@ -1543,7 +1647,13 @@ dexit.BccVM = function(params) {
 
 
             if (autoComplete) {
-                bccLib.fetchNextElement(referenceId);
+                if (postRun) {
+                    self._checkPostRun(params,formElement,referenceId, values,function(err, res) {
+                        bccLib.fetchNextElement(referenceId);
+                    });
+                }else {
+                    bccLib.fetchNextElement(referenceId);
+                }
             }
             //show next
 
@@ -1768,6 +1878,9 @@ dexit.BccVM = function(params) {
                 // }
             }
         };
+
+        clearTimers()
+
         $(formElement).jsonForm(formDefinition);
 
         jQuery(".hover-home .form-group input").each(function() {
@@ -1873,8 +1986,13 @@ dexit.BccVM = function(params) {
                                     done(); //skip
                                 })
                             }else {
-                                let val = window[fnName](values[name]);
-                                values[name] = val;
+                                try {
+                                    let val = window[fnName](values[name]);
+                                    values[name] = val;
+                                }catch(e) {
+
+                                }
+                                done();
                             }
                         }
                     }, function (err) {
@@ -2007,20 +2125,25 @@ dexit.BccVM = function(params) {
             return cb(null,{});
         }
 
-
         if (found && values && values.startDate && values.endDate) {
-
 
             var startDate = moment(values.startDate);
             var endDate = moment(values.endDate);
+            var transactionType = values.transactionType;
 
             found = _.filter(found,function(o) {
                 var tempDate = moment(o.date);
                 return tempDate.isBetween(startDate,endDate);
-
             });
 
+            if (transactionType && transactionType !== "None") {
+                found = _.filter(found,function(o) {
+                    return (o.transactionType === transactionType);
+                });
+            }
         }
+
+
         data[name] = found;
         cb(null,data);
 
@@ -2080,7 +2203,7 @@ dexit.BccVM = function(params) {
           bccVM.closeBehaviourLB(lightbox, lightboxWrapper, domId);
           bccLib.fetchNextElement(referenceId);
         },
-        false,
+        {capture: false, once:true},
     );
 
     //set to iframe src
@@ -2188,7 +2311,8 @@ dexit.BccVM = function(params) {
           function() {
             bccLib.fetchNextElement(referenceId);
           },
-          false,
+          {capture: false, once:true}
+
       );
       $(targetEl).css({cursor: 'pointer'});
     }
@@ -2201,7 +2325,7 @@ dexit.BccVM = function(params) {
           function() {
             bccLib.fetchNextElement(referenceId);
           },
-          false,
+          {capture: false, once:true},
       );
       $(targetEl).css({cursor: 'pointer'});
     }
@@ -2212,20 +2336,20 @@ dexit.BccVM = function(params) {
   };
 
   self.showNavControls = function() {
-    if (bccVM.resizeOnLoad() === true) {
-      bccVM.resizeLecturePanel();
-      return;
-    }
-    // turn scroller controls on, slide lecture content in
-    try {
-      document.querySelector('.course-home').classList.remove('hidden');
-    } catch (e) {}
-
-    try {
-      document
-          .querySelector('.ucc-preloader')
-          .classList.remove('show-ucc-preloader');
-    } catch (e) {}
+    // if (bccVM.resizeOnLoad() === true) {
+    //   bccVM.resizeLecturePanel();
+    //   return;
+    // }
+    // // turn scroller controls on, slide lecture content in
+    // try {
+    //   document.querySelector('.course-home').classList.remove('hidden');
+    // } catch (e) {}
+    //
+    // try {
+    //   document
+    //       .querySelector('.ucc-preloader')
+    //       .classList.remove('show-ucc-preloader');
+    // } catch (e) {}
   };
 
   self.resizeLecturePanel = function() {
@@ -2280,7 +2404,7 @@ dexit.BccVM = function(params) {
           bccVM.closeLB(lightbox);
           bccLib.fetchNextElement(referenceId);
         },
-        false,
+        {capture: false, once:true},
     );
     lboxHeader.firstChild.nodeValue =
         'Link: ' + el.querySelector('span').innerHTML;
@@ -2362,54 +2486,54 @@ dexit.BccVM = function(params) {
     self.clearDiv(targetRegion);
     self.clearIframeResponsive(targetRegion);
     // TODO => create generic link holder for next element (behaviour or multimedia)
-    if (bccVM.nextElement() !== null) {
-      var anchorWrapper = document.createElement('div');
-      // nextElIcon = document.createElement('i'),
-      // nextElText = document.createElement('p');
-
-      if (bccVM.nextElement() === 'behaviour') {
-        //set text based on behaviour definition
-        // nextElText.innerHTML = bccVM.nextElementText();
-
-        // nextElIcon.classList.add('fa', bccVM.nextElementIcon());
-        anchorWrapper.addEventListener(
-            'click',
-            function() {
-              //alert('clicked');
-              //
-              bccLib.fetchNextElement(referenceId);
-            },
-            false,
-        );
-      } else if (bccVM.nextElement() === 'multimedia') {
-        // var secondIcon = document.createElement('i');
-
-        // nextElText.innerHTML = "Next";
-        // nextElIcon.classList.add('glyphicon', 'glyphicon-film');
-        // secondIcon.classList.add('glyphicon', 'glyphicon-picture');
-        anchorWrapper.addEventListener(
-            'click',
-            function() {
-              bccLib.fetchNextElement(referenceId);
-            },
-            false,
-        );
-
-        // anchorWrapper.appendChild(secondIcon);
-      }
-
-      // nextElIcon.classList.add('text-center', 'ucc-qs-icon', 'ucc-chat-icon');
-
-      // anchorWrapper.appendChild(nextElIcon);
-      // anchorWrapper.appendChild(nextElText);
-      // anchorWrapper.classList.add('ucc-qs-link', 'ucc-chat-imageonly', bccVM.textIconWrapper());
-
-      behContainer = anchorWrapper;
-
-      //if (bccVM.mediaType() === "image") {
-      //    targetRegion.appendChild(anchorWrapper);
-      //}
-    }
+    // if (bccVM.nextElement() !== null) {
+    //   var anchorWrapper = document.createElement('div');
+    //   // nextElIcon = document.createElement('i'),
+    //   // nextElText = document.createElement('p');
+    //
+    //   if (bccVM.nextElement() === 'behaviour') {
+    //     //set text based on behaviour definition
+    //     // nextElText.innerHTML = bccVM.nextElementText();
+    //
+    //     // nextElIcon.classList.add('fa', bccVM.nextElementIcon());
+    //     anchorWrapper.addEventListener(
+    //         'click',
+    //         function() {
+    //           //alert('clicked');
+    //           //
+    //           bccLib.fetchNextElement(referenceId);
+    //         },
+    //         {capture: false, once:true},
+    //     );
+    //   } else if (bccVM.nextElement() === 'multimedia') {
+    //     // var secondIcon = document.createElement('i');
+    //
+    //     // nextElText.innerHTML = "Next";
+    //     // nextElIcon.classList.add('glyphicon', 'glyphicon-film');
+    //     // secondIcon.classList.add('glyphicon', 'glyphicon-picture');
+    //     anchorWrapper.addEventListener(
+    //         'click',
+    //         function() {
+    //           bccLib.fetchNextElement(referenceId);
+    //         },
+    //         {capture: false, once:true},
+    //     );
+    //
+    //     // anchorWrapper.appendChild(secondIcon);
+    //   }
+    //
+    //   // nextElIcon.classList.add('text-center', 'ucc-qs-icon', 'ucc-chat-icon');
+    //
+    //   // anchorWrapper.appendChild(nextElIcon);
+    //   // anchorWrapper.appendChild(nextElText);
+    //   // anchorWrapper.classList.add('ucc-qs-link', 'ucc-chat-imageonly', bccVM.textIconWrapper());
+    //
+    //   behContainer = anchorWrapper;
+    //
+    //   //if (bccVM.mediaType() === "image") {
+    //   //    targetRegion.appendChild(anchorWrapper);
+    //   //}
+    // }
 
     // all stuff related to the interstitial => after the MM is done playing / a click etc
     if (bccVM.mediaType() == 'video') {
@@ -2653,7 +2777,7 @@ dexit.BccVM = function(params) {
             function() {
               bccVM.popLightBox(linkItem, referenceId);
             },
-            false,
+            {capture: false, once:true},
         );
         //linkItem.dataset.bind = 'click: function() { bccVM.popLightBox($element); }';
         linkList.appendChild(linkItem);

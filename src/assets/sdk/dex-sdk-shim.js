@@ -4187,6 +4187,7 @@ dexit.scp.device.request.XHRRequestWithRetry = function(url_base, type, resource
             return '';
         }
     }
+    // return callback(new Error('sss'));
 
     headers = headers || {};
     var ME = this;
@@ -4241,7 +4242,15 @@ dexit.scp.device.request.XHRRequestWithRetry = function(url_base, type, resource
         callback(null,res);
     }).catch((err) => {
         //TODO: error handling for 401, 500,504. 503 etc
-        debugger;
+
+
+
+        // alert('invalid respose received');
+        console.log('invalid respose received');
+        try {
+        console.log(JSON.stringify(err));
+
+        }catch(e) {}
         console.log('resource: '+resource+' action: '+type+' error:' ,err);
         callback(err);
     });
@@ -8059,7 +8068,7 @@ dexit.device.sdk = (function (pubSub,logger,EPHandler) {
             executionManager.stop({id:epId});
             setTimeout(function(){
                 callback();
-            },100);
+            },50);
 
         });
 
@@ -8256,7 +8265,7 @@ dexit.device.sdk = (function (pubSub,logger,EPHandler) {
             });
 
         }
-        debugger;
+
         executionManager.stateStorage.stopProcessing();
 
         if (epHandler) {
@@ -10093,7 +10102,7 @@ dexit.ExecutionManager = function(config,stateStorage, scManager, pubSub) {
         // //suspend the current pattern
         // dexit.device.sdk.getExecutionManager().stop({id:data.epId});
         // dexit.device.sdk.unloadEngagementPattern(data.epId, function(err, res) {
-        //     debugger;
+        //
         //
         // })
 
@@ -10511,7 +10520,7 @@ dexit.ExecutionManager.prototype._execute = function(eg,currentElement, previous
                             setTimeout(function () {
                                 dexit.device.sdk.getParentRef().hideLoadingIndicator();
                                 dexit.device.sdk.presentationMng.plugin.endTransition(data);
-                            }, 900);
+                            }, 500);
                         }
 
 
@@ -10913,18 +10922,26 @@ dexit.ExecutionManager.prototype._runElement = function(eg, currentElement, tran
                     };
                 }
             }
-
-
-            decisionElement.evaluate(theArgs, intelParams, 'presentation',function(err, result) {
+            if (!decisionElement) {
                 if (err) {
-                    data.error = err;
+                    data.error = new Error("no decision found");
                 }
-                data.result = result;
                 //self._publish(EXECUTE_DONE_EVENT,data);
-
+                console.log('invalid pattern element');
+                alert('invalid pattern element');
                 self.onElementDone(eg, data);
-                //self._presentElement(data, transition);
-            });
+            } else {
+                decisionElement.evaluate(theArgs, intelParams, 'presentation', function (err, result) {
+                    if (err) {
+                        data.error = err;
+                    }
+                    data.result = result;
+                    //self._publish(EXECUTE_DONE_EVENT,data);
+
+                    self.onElementDone(eg, data);
+                    //self._presentElement(data, transition);
+                });
+            }
             break;
         default:
 
@@ -11117,6 +11134,11 @@ dexit.ExecutionManager.prototype.resume = function(id, overrideContainer, callba
                     self._execute(eg, currentElement, null, eg.executionDoneCallback);
                 }
             });
+            setTimeout(()=> {
+                dexit.device.sdk.presentationMng.plugin.endTransition(startData);
+            }, 200)
+
+
         });
     }else {
         return callback(new Error('no valid pattern found to execute'));
@@ -11157,7 +11179,7 @@ dexit.ExecutionManager.prototype.suspend = function(egId, suspendedFromElementId
 
         this.executions.splice(index,1);
     }else {
-        debugger;
+
     }
 
 };
@@ -11241,7 +11263,7 @@ dexit.LayoutProcessor = function LayoutProcessor() {
        // var dom = new JSDOM(`<body></body>`);
 
         //workaround
-        debugger;
+
         //const $ = cio.load('<span>+layout+</span>');
         const $ = cio.load(layout);
         let $layout = $();
@@ -11638,7 +11660,7 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
                     return cb(null,result.checkCache);
                 }
                 //TODO: if the playItem is not "dynamic" then can should bypass sc-presentation,
-                debugger;
+
                 var scheduleData = _buildScheduleDataObj(playItem);
                 scPresentationClient.createPlaylist(touchpoint.touchpoint, touchpoint.channel_id,
                     touchpoint.channel_type_id, scheduleData, userId, authToken, function(err, result) {
@@ -11677,7 +11699,7 @@ dexit.MultimediaHandler = function (config, params, presentationClient,layoutPro
 
 
         //TODO: if the playItem is not "dynamic" then can should bypass sc-presentation,
-        //debugger;
+        //
 
 
     };
@@ -11799,7 +11821,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
         }
 
         var toPass =  (_.isArray(layoutId) ? layoutId[0] : layoutId);
-        //debugger;
+        //
 
         AsyncStorage.getItem('layout-'+toPass, (err, data) => {
             if (data) {
@@ -11897,7 +11919,7 @@ dexit.PresentationMng = function(config, params, plugin, mmHandler, dexRequestUt
                     return callback(err);
                 }
 
-                debugger;
+
                 //need to determine parent's container
                 //var container = data.layoutRef;
 

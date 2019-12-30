@@ -32,12 +32,14 @@ let html = require('./ep-home');
 let htmlLoad = '<b>Load</b>';
 let key = 1;
 
+
 class HomeScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
       token: ' ',
       appState: AppState.currentState,
+      key: 1,
     };
   }
 
@@ -46,39 +48,18 @@ class HomeScreen extends Component {
   componentDidMount() {
     access_Token = this.props.navigation.state.params.accessToken;
     refresh_Token = this.props.navigation.state.params.refreshToken;
-    //his.setState({'refresh_Token
 
     // accessTokenExpirationDate = this.props.navigation.state.params.accessTokenExpirationDate;
     //TODO: check date and expiry
-    AppState.addEventListener('change', () => this._handleAppStateChange);
+
   }
 
   componentWillUnmount() {
-    AppState.removeEventListener('change', () => this._handleAppStateChange);
-  }
-  _handleAppStateChange(nextAppState) {
-    debugger;
-    console.log('nextAppState:'+ nextAppState)
-    if (
-        this.state.appState.match(/inactive|background/) &&
-        nextAppState === 'active'
-    ) {
-      console.log('app state handler from inactive to active');
-      alert('home: app went to foreground');
-      this.onLogoutPress();
 
-      // let key = this.state.key;
-      // this.setState({key: key + 1});
-      // self.loadPortal(self.tpId, '', function(err) {
-      //   console.log(err);
-      // });
-
-    }else {
-      debugger;
-    }
   }
 
-    onCheckPress = () => {
+
+  onCheckPress = () => {
     this.setState({
       token: access_Token,
     });
@@ -242,7 +223,7 @@ class HomeScreen extends Component {
             //key={refresh_Token}
             style={{flex: 1}}
             onlogoutPress={this.onLogoutPress}
-
+            key={1}
           />
         </View>
         <View style={styles.buttonContainer}>

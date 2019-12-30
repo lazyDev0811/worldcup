@@ -17,62 +17,18 @@ module.exports = function() {
 <!--    <link rel="stylesheet" href="https://releases.dexit.co/dex-css-master/0.0.40/ice4m_main.css">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.6.5/video-js.min.css" integrity="sha256-kflKPH4F0cGv0BJg6I6+pb5nIO01FMeoK7qWoz1NayE=" crossorigin="anonymous" />
 <!--    <link href="https://3pa.cdnedge.bluemix.net/ajax/libs/video.js/6.3.3/video-js.css" rel="stylesheet">-->
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<!--    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">-->
     
     
     <style>
-       body {font-family: 'Lato', sans-serif; background: #FFFFFF;}
+        body {background: #FFFFFF;}
+       /*body {font-family: 'Lato', sans-serif; background: #FFFFFF;}*/
     </style>
     
     
     <style>
     
-           .hidden {
-            display:none;
-           }
-           .banner-wrapper {
-            max-height: 296px;
-            box-shadow: none;
-           }
-           
-           
-           
-            
-           .main-container2 {
-                position: relative;
-                left: 511px;  
-                background: white;
-                display: none;
-                /*height:0;*/
-            }
-            
-            .con {
-                /*width: 414px;*/
-                /*height: 510px;*/
-                /*background: #ccc;*/
-                /*z-index: 99;*/
-            }
-            
-            .slidein {
-                animation: slidein ease 400ms forwards;
-                display: block;
-                /*height: auto;*/
-            }
-            
-            @keyframes slidein {
-                100% {
-                    left: 0px;
-                }
-            }    
-            
-            .activecampaign {
-              z-index: 9999999;
-              top: 0;
-              position: relative;
-              background: white;
-              
-            }
-    
+          
     </style>
 
 </head>
@@ -84,6 +40,13 @@ module.exports = function() {
 <!--<div class="main-containers" style="position: fixed;top: 0;">-->
 <!--    <div id="main-container1" class="main-container2 slidein" style="width: 100%">   -->
 <!--    </div>-->
+<!-- <div id="tog" class="con fade-in fade-out">-->
+<!--    <div class="preloader">-->
+<!--      <img src="https://s3.us-south.cloud-object-storage.appdomain.cloud/dex-resource-00/layouts/sadad-branded/loader/images/spinner.svg" alt="spinner">-->
+<!--      <p class="fade-in">LOADING...</p>-->
+<!--    </div>-->
+<!--  </div>-->
+
 <div class="main-containers" style="top: 0; position: relative;overflow-x: hidden;">
 </div>
 
@@ -243,24 +206,9 @@ module.exports = function() {
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/async/2.6.3/async.min.js"></script>
     
-    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.3/bcc-main-multi-layout-post-message-bypass.js"></script>
+    <script src="https://s3.us-south.cloud-object-storage.appdomain.cloud/00-dex-release/bcc-presentation-react/0.1.5/bcc-main-multi-layout-post-message-bypass.js"></script>
     
-<!--    <script src="https://3pa.cdnedge.bluemix.net/ajax/libs/video.js/6.3.3/video.js"></script>-->
-<!--    <script src="https://releases.dexit.co/bcc-presentation-react/main.js"></script>-->
-     
-<!--     <script type="application/javascript">-->
-<!--        $( document ).ready(function() {-->
-<!--        -->
-<!--            // if (window && window.bccLib) {-->
-<!--            //     $('.status').append('<h1>bccLib loaded</h1>')-->
-<!--            // } else {-->
-<!--            //      $('.status').append('<h1>bccLib not loaded</h1>')-->
-<!--            // }-->
-<!--                -->
-<!--            -->
-<!--        })      -->
-<!--    </script>-->
-<!--    -->
+
     <script>
     
         function keyboardShown() {
@@ -274,34 +222,8 @@ module.exports = function() {
             jQuery('div.bottom-menu').removeAttr('hidden');
         }
         
-    </script>
-    
-    
-    
-<!--    jQuery(document).ready(function() {-->
-
-<!--        jQuery(".hover-home .form-group input").each(function() {-->
-<!--            if (jQuery(this).val().length > 0) {-->
-<!--                jQuery(this).closest(".form-group").addClass("hasvalue");-->
-<!--            } else {-->
-<!--                jQuery(this).closest(".form-group").removeClass("hasvalue");-->
-<!--            }-->
-<!--        });-->
-<!--        jQuery(".hover-home .form-group input").on("input", function() {-->
-<!--            if (jQuery(this).val().length > 0) {-->
-<!--                jQuery(this).closest(".form-group").addClass("hasvalue");-->
-<!--            } else {-->
-<!--                jQuery(this).closest(".form-group").removeClass("hasvalue");-->
-<!--            }-->
-<!--        });-->
-<!--    });-->
-<!--    </script>-->
-<!--    -->
-    
-    
+    </script>        
 </body>
-
-
 </html>
 `;
 };
