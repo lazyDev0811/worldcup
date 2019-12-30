@@ -7,7 +7,8 @@ import {
     TouchableOpacity,
     StyleSheet,
     Platform,
-    Alert
+    Alert,
+    Picker
 } from 'react-native';
 import {emailText, passwordText, loginText, enter_email, enter_password} from '../constants/strings';
 import {NavigationActions, StackActions} from 'react-navigation';
@@ -25,51 +26,23 @@ class LoginScreen extends React.Component {
 
     constructor(props) {
         super(props)
-        // this.state = {
-        //     emailText: '',
-        //     passwordText: ''
-        // }
+        this.state = {
+            language: '',
+        }
     }
 
     componentDidMount() {
 
     }
-
-    // onEmailChange = (text) => {
-    //     this.setState({
-    //         emailText: text
-    //     });
-    // }
-    //
-    // onPasswordChange = (text) => {
-    //     this.setState({
-    //         passwordText: text
-    //     });
-    // }
-
     showAlert = (message) => {
         Alert.alert(
             message
         );
     }
-    // async fetchMe() {
-    //     const resp = fetch('https://jsonplaceholder.typicode.com/todos/1');
-    //
-    //         .then(response => response.json())
-    //         .then(json => {
-    //             console.log(json);
-    //             return json;
-    //         });
-    // }
+
 
     onLoginPress = async () => {
 
-        //const {emailText, passwordText} = this.state;
-        // if (emailText.length === 0) {
-        //     this.showAlert(enter_email)
-        // } else if (passwordText.length === 0) {
-        //     this.showAlert(enter_password)
-        // } else {
         const {navigation} = this.props;
         // use the client to make the auth request and receive the authState
         try {
@@ -79,7 +52,6 @@ class LoginScreen extends React.Component {
             } else {
                 config = configAndriod;
             }
-            // debugger;
             // const testme = await this.fetchMe();
 
 
@@ -105,11 +77,6 @@ class LoginScreen extends React.Component {
     }
 
     renderLoginButton() {
-        // if (this.props.authentication.loading) {
-        //     return <ActivityIndicator
-        //         size='small'
-        //     />
-        // } else {
         return (
             <TouchableOpacity style={{marginTop: 12}}
                               onPress={this.onLoginPress}>
@@ -120,43 +87,26 @@ class LoginScreen extends React.Component {
                 </View>
             </TouchableOpacity>
         );
-        // }
+
     }
 
     renderMain() {
         return (
             <View style={styles.container}>
-
-                <View style={styles.logoCircle}>
-                    <Image
-                        style={styles.logo}
-                        source={require('../assets/icons/big_logo.png')}
-                    />
-                </View>
-
-                {/* <Text style={[styles.commonEmailPasswordText, { marginTop: 24 }]}>
-                    {emailText}
-                </Text>
-
-                <TextInput
-                    style={styles.commonEmailPasswordTextInput}
-                    value={this.state.emailText}
-                    onChangeText={this.onEmailChange}
+                <Image
+                    style={styles.logo}
+                    source={require('../assets/icons/big_logo.png')}
                 />
-
-                <Text style={[styles.commonEmailPasswordText, { marginTop: 16 }]}>
-                    {passwordText}
-                </Text>
-
-                <TextInput
-                    secureTextEntry={true}
-                    style={styles.commonEmailPasswordTextInput}
-                    value={this.state.passwordText}
-                    onChangeText={this.onPasswordChange}
-                /> */}
-
+                <Picker
+                    selectedValue={this.state.language}
+                    style={{height: 50, width: 200}}
+                    onValueChange={(itemValue, itemIndex) =>
+                        this.setState({language: itemValue})
+                    }>
+                    <Picker.Item label="العربية" value="arabic" />
+                    <Picker.Item label="English" value="english" />
+                </Picker>
                 {this.renderLoginButton()}
-
             </View>
         );
 
@@ -175,9 +125,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        //backgroundColor: '#f9fbfd',
-        // backgroundColor: '#142550',
-        backgroundColor: '#e2782c',
+        backgroundColor: '#fafdff',
         padding: 4,
         justifyContent: 'center',
         alignItems: 'center'
@@ -202,8 +150,6 @@ const styles = StyleSheet.create({
     },
 
     loginView: {
-        //backgroundColor: '#57a9ea',
-        // backgroundColor: '#142550',
         backgroundColor: '#fafdff',
         borderRadius: 8,
         paddingTop: 10,
@@ -212,36 +158,18 @@ const styles = StyleSheet.create({
         margin: 8,
         borderWidth: 2,
         alignItems: 'center',
-        borderColor: '#73b744',
+        borderColor: '#4b515c',
     },
 
     loginText: {
-        fontFamily:'poppins',
+        fontFamily:'Poppins-Bold',
         color: '#4b515c',
         fontSize: 17,
         fontWeight: 'bold',
     },
-    logoCircle: {
-        width:  wp('45%'),
-        height:wp('45%'),
-        //width: 300,
-        //height: 300,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: wp('45%')/2,
-        //borderColor:'red',
-        //borderRadius: wp('40%') / 2,//(wp('40%') / 2),
-        backgroundColor:'white',
-    },
     logo: {
         width: wp('30%'),
         height: wp('30%'),
-     //  backgroundColor:'green',
-        // borderRadius: wp('40%') / 2,
-        // borderWidth: 20,
-
-
-        // backgroundColor:'red'
     }
 
 });

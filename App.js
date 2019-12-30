@@ -6,48 +6,75 @@
  * @flow
  */
 
-import {View, Alert} from 'react-native';
-import { createAppContainer } from 'react-navigation';
-import { rootNavigator } from './src/router/Router';
+import {View, Alert, AppState} from 'react-native';
+import {createAppContainer} from 'react-navigation';
+import {rootNavigator} from './src/router/Router';
 import React from 'reactn';
 
 const Container = createAppContainer(rootNavigator);
 import NetInfo from '@react-native-community/netinfo';
-import { Dialog } from 'react-native-simple-dialogs';
+import {Dialog} from 'react-native-simple-dialogs';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class App extends React.Component {
-
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
-      dialogVisible: false
-    }
+      dialogVisible: false,
+      appState: AppState.currentState,
+    };
   }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = async nextAppState => {
+    this.setState({appState: nextAppState});
+
+    const {navigation} = this.props;
+
+    if (nextAppState === 'background' || nextAppState === 'inactive') {
+      //TODO: Do something here on app background to save the state the the App
+      console.log('*******APP: going to Background Mode.*****');
+    } else {
+      console.log('*******APP: nextAppState ' + nextAppState + '*****');
+    }
+
+    if (nextAppState === 'active') {
+      //TODO: Do something here on app active foreground mode.
+      console.log('App is in Active Foreground Mode.');
+      let s = await AsyncStorage.getItem('appState')
+      console.log('appState:' + s);
+    }
+  };
 
   componentDidMount() {
     var self = this;
     NetInfo.addEventListener(state => {
-      console.log("Is connected?", state.isConnected);
-      setTimeout(function () {
+      console.log('Is connected?', state.isConnected);
+      setTimeout(function() {
         if (state.isConnected) {
           self.setState({
-            dialogVisible: false
+            dialogVisible: false,
           });
         } else {
           self.setState({
-            dialogVisible: true
+            dialogVisible: true,
           });
         }
       }, 3000);
     });
+
+    AppState.addEventListener('change', this._handleAppStateChange);
   }
 
   renderDialog() {
     return (
       <Dialog
         visible={this.state.dialogVisible}
-        title="Internet connection not available.  Please reconnect to continue">
-      </Dialog>
+        title="Internet connection not available.  Please reconnect to continue"
+      />
     );
   }
 

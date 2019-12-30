@@ -7,6 +7,8 @@ import {
   AppState,
   ActivityIndicator,
   Keyboard,
+  Image,
+  Alert,
 } from 'react-native';
 import {WebView} from 'react-native-webview';
 import PubSub from 'pubsub-js';
@@ -21,16 +23,20 @@ import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-community/async-storage';
 import async from 'async';
 import {dexit} from '../assets/sdk/dex-sdk-shim';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import DeviceInfo from 'react-native-device-info';
 import ScanScreen from './scan-screen.js';
 import {withNavigation} from 'react-navigation';
+
+// import Background from '../assets/icons/world_cup.jpg';
+
+import AnimatedLoader from 'react-native-animated-loader';
 
 var selfWeb;
 
 // import { createStackNavigator } from 'react-navigation-stack';
 import {NavigationActions, StackActions} from 'react-navigation';
-
+import * as Keychain from 'react-native-keychain';
 //const hasWebAccell = () => DeviceInfo.getApiLevel() !== 28;
 
 import {
@@ -124,10 +130,11 @@ class Web extends React.Component {
             let cb = this.uuidsToCb[obj.id];
             if (!cb) {
               debugger;
-              console.log('no cb');
+              console.log('no cb for:' + obj.id);
             }
 
             if (obj.hasError && obj.error) {
+              debugger;
               var error = new Error(obj.error);
               cb(error);
             } else {
@@ -150,22 +157,52 @@ class Web extends React.Component {
                 data.element.intelligence.epId &&
                 data.element.intelligence.epId.startsWith('1111')
               ) {
-                debugger;
-                if (data.element.intelligence.epId == '111114') {
-                  selfWeb.logoutPress();
-                } else if (data.element.intelligence.epId == '111110') {
-                  debugger;
-                  selfRef.openCamera(data);
-
-                  // selfWeb.openCamera();
-
-                  debugger;
-                } else if (data.element.intelligence.epId == '111117')  {
-                  debugger;
-                  selfRef.callNumber(data);
+                let str = data.element.intelligence.epId;
+                switch (str) {
+                  case '111114':
+                    selfWeb.logoutPress();
+                    break;
+                  case '111110':
+                    selfRef.openCamera(data);
+                    break;
+                  case '111117':
+                    selfRef.callNumber(data);
+                    break;
+                  case '111118':
+                    selfRef.downloadTransaction(data);
+                    break;
+                  case '111119':
+                    selfRef.getFromKeychain(data);
+                    break;
+                  case '111120':
+                    selfRef.setKeychain(data);
+                    break;
+                  default:
+                    console.log('unhandled item')
+                    break;
+                    // selfWeb.dexit.PubSub.publish('dexit.ep.show', data);
                 }
+                //
+                // debugger;
+                // if (data.element.intelligence.epId == '111114') {
+                //   selfWeb.logoutPress();
+                // } else if (data.element.intelligence.epId == '111110') {
+                //   debugger;
+                //   selfRef.openCamera(data);
+                //
+                //   // selfWeb.openCamera();
+                //
+                //   debugger;
+                // } else if (data.element.intelligence.epId == '111117') {
+                //   debugger;
+                //   selfRef.callNumber(data);
+                // } else if (data.element.intelligence.epId == '111117') {
+                //   debugger;
+                //   selfRef.callNumber(data);
+                // }
                 //alert(data.element.intelligence.epId);
               } else {
+
                 selfWeb.dexit.PubSub.publish('dexit.ep.show', data);
               }
             } else if (obj.op && obj.op === 'dexit.ep.executeBehaviour') {
@@ -207,6 +244,7 @@ class Web extends React.Component {
         }
       },
       resetAll: function() {
+
         const run = `
             setTimeout(() => {
               try {
@@ -218,11 +256,10 @@ class Web extends React.Component {
         selfWeb.sendMessage(run);
       },
 
-
       sendBehaviourResponse: function(id, err, data) {
         let obj = {
           error: err,
-          data: data
+          data: data,
         };
         let objStr = JSON.stringify(obj);
         const run = `setTimeout(function() {
@@ -250,16 +287,20 @@ class Web extends React.Component {
       },
 
       setUser: function(obj) {
+
         let objStr = JSON.stringify(obj);
         const run = `
             setTimeout(function() {
-              let objStr = '${objStr}';
-              try { 
-                let obj = JSON.parse(objStr);
+              console.log("set user");
+              
+              try {
+                let obj = ${objStr}; 
+                // let obj = JSON.parse(objStr);
                 bccLib.setUser(obj);
               }catch(e){}
             }, 10);
             true;`;
+
         selfWeb.sendMessage(run);
       },
       setErrorStatus: function(err) {
@@ -274,22 +315,34 @@ class Web extends React.Component {
         selfWeb.sendMessage(run);
       },
       show: function(obj, callback) {
-        let id = uuid.v4();
+        let id = uuid();
         try {
           //FIXME:  remove invalid json that is not used based on serialize/de-serialzation
           if (obj.nextElement && obj.nextElement.ds) {
             delete obj.nextElement.ds;
           }
-          var objStr = JSON.stringify(obj);
 
+          try {
+            var objStr = JSON.stringify(obj);
+          } catch (e) {
+            debugger;
+          }
           const run = `
          setTimeout(() => {
+         
+            try {
+         
               var toShow = ${objStr};
 
               bccLib.show('${id}', toShow, function(err) {
                 //msg back here
                 //alert('showing');
               });
+              
+              }catch(e) {
+                debugger;
+              }
+              
             }, 10);
           `;
 
@@ -334,12 +387,13 @@ class Web extends React.Component {
 
         var ref = '#ep___' + epId + '___' + layoutId;
 
-        if (data && data.overrideContainer && data.overrideContainer.indexOf('[data-region') != -1) {
+        if (
+          data &&
+          data.overrideContainer &&
+          data.overrideContainer.indexOf('[data-region') != -1
+        ) {
           return;
         }
-
-        debugger;
-
 
         //ignore repeats
 
@@ -395,7 +449,7 @@ class Web extends React.Component {
           window.scrollTo(0, 0);
          
                       
-         },300);`;
+         },100);`;
 
         //
         //  if (loader) {
@@ -434,17 +488,13 @@ class Web extends React.Component {
         //   console.log(e);
         // }
 
-        console.log('running:'+run)
-
-
+        console.log('running:' + run);
 
         selfWeb.sendMessage(run);
       },
-
-
     }; //end bcc-lib
 
-    Keyboard.addListener('keyboardDidShow',(frames)=>{
+    Keyboard.addListener('keyboardDidShow', frames => {
       const run = `
              setTimeout(() => {
                keyboardShown();
@@ -452,8 +502,7 @@ class Web extends React.Component {
             `;
       selfWeb.sendMessage(run);
     });
-    Keyboard.addListener('keyboardDidHide',(frames)=>{
-
+    Keyboard.addListener('keyboardDidHide', frames => {
       const run = `
              setTimeout(() => {
                 keyboardHidden();
@@ -463,17 +512,25 @@ class Web extends React.Component {
     });
   }
 
-  // componentDidMount() {
-  //   this._prepare();
-  // }
+
   componentDidMount() {
     debugger;
+
+    const {navigation} = this.props;
+
+    this.props.navigation.setParams({paramSaveState: this._saveExecutionState});
+
+    this.focusListener = navigation.addListener('didFocus', () => {
+      // The screen is focused
+      // Call any action
+      console.log('WEB was focused');
+    });
 
     if (this.state.loaded) {
       this.state.setState({loaded: false});
     }
     // alert('loading');
-    this._prepare()
+    this.prepre = this._prepare()
       .then(loaded => {
         console.log('loading');
         // alert('loaded');
@@ -485,61 +542,109 @@ class Web extends React.Component {
         debugger;
         alert('problem loading...please reload app');
       });
-    AppState.addEventListener('change', () => this._handleAppStateChange);
+    // AppState.addEventListener('change', () => this._handleAppStateChange);
+
+    // this.props.navigation.setParams({
+    //   saveExecutionState: this._saveExecutionState,
+    // });
+
+    // this.props.navigation.setParams({
+    //   loadExecutionState: this._loadExecutionState,
+    // });
   }
 
-  _storeAppData = async (appState) => {
+  _saveExecutionState = async () => {
+    debugger;
+
+    console.log('WEB: saving executing state');
+    console.log('WEB: lastEPID: ' + this.lastEPId);
+
+    //let currentEP = this.e
+  };
+
+  _loadAppData = async () => {
+    let s = await AsyncStorage.getItem('appState');
+    return s;
+  };
+
+  _storeAppData = async appState => {
     try {
       await AsyncStorage.setItem('appState', appState);
-      console.log("done storing");
+      console.log('done storing');
     } catch (error) {
       console.log(error);
-    }};
+    }
+  };
 
   componentWillUnmount() {
-    AppState.removeEventListener('change', () => this._handleAppStateChange);
+    if (this.prepre) {
+      this.prepre.cancel();
+    }
+    // AppState.removeEventListener('change', () => this._handleAppStateChange);
     dexit.device.sdk.unload(err => {
-      debugger
+      debugger;
       if (err) {
         console.log('warning error unloading');
       }
+
+
     });
 
+    this.focusListener.remove();
   }
-  async _handleAppStateChange(nextAppState) {
-    debugger;
-    console.log('WEb nextAppState:' + nextAppState);
-    alert(nextAppState);
-    // AsyncStorage.set('appState', nextAppState);
+  // async _handleAppStateChange(nextAppState) {
+  //   debugger;
+  //   Alert.alert('new state', nextAppState);
+  //   console.log('WEb nextAppState:' + nextAppState);
+  //   alert(nextAppState);
+  //   // AsyncStorage.set('appState', nextAppState);
+  //
+  //   if (nextAppState === 'background' || nextAppState === 'inactive') {
+  //     //save state before loading
+  //     this._storeAppData(nextAppState);
+  //   }
+  //
+  //   try {
+  //     let appState = await AsyncStorage.getItem('appState');
+  //
+  //     if (
+  //         this.state.appState.match(/inactive|background/) &&
+  //         nextAppState === 'active'
+  //     ) {
+  //       //alert('app went to foreground');
+  //       let key = this.state.key;
+  //       this.setState({key: key + 1});
+  //       // self.loadPortal(self.tpId, '', function(err) {
+  //       //   console.log(err);
+  //       // });
+  //
+  //     }
+  //   }catch(e) {
+  //     debugger;
+  //     console.log('error');
+  //   }
+  //   this._storeAppData(nextAppState);
+  //
+  //   //this.setState({appState: nextAppState});
+  // }
 
-    if (nextAppState === 'background' || nextAppState === 'inactive') {
-      //save state before loading
-      this._storeAppData(nextAppState);
+  _handleAppStateChange = nextAppState => {
+    this.setState({appState: nextAppState});
+    if (nextAppState === 'background') {
+      // Do something here on app background.
+      console.log('App is in Background Mode.');
     }
 
-    try {
-      let appState = await AsyncStorage.getItem('appState');
-
-      if (
-          this.state.appState.match(/inactive|background/) &&
-          nextAppState === 'active'
-      ) {
-        //alert('app went to foreground');
-        let key = this.state.key;
-        this.setState({key: key + 1});
-        // self.loadPortal(self.tpId, '', function(err) {
-        //   console.log(err);
-        // });
-
-      }
-    }catch(e) {
-      debugger;
-      console.log('error');
+    if (nextAppState === 'active') {
+      // Do something here on app active foreground mode.
+      console.log('App is in Active Foreground Mode.');
     }
-    this._storeAppData(nextAppState);
 
-    //this.setState({appState: nextAppState});
-  }
+    if (nextAppState === 'inactive') {
+      // Do something here on app inactive mode.
+      console.log('App is in inactive Mode.');
+    }
+  };
 
   // componentWillMount() {
   //   this._asyncLoad = this._prepare().then(loaded => {
@@ -553,7 +658,6 @@ class Web extends React.Component {
   //   }
   // }
   callNumber = data => {
-
     debugger;
     // alert('calling number');
     const number =
@@ -561,6 +665,17 @@ class Web extends React.Component {
         ? data.callNumber
         : configShared.supportPhoneNumber;
     callNumber(number);
+  };
+
+  downloadTransaction = data => {
+    debugger;
+    let values = data || [];
+    if (_.isString(values)) {
+      values = JSON.parse(values);
+    }
+    if (!_.isArray(values)) {
+      values = [values];
+    }
   };
 
   openCamera = data => {
@@ -575,22 +690,23 @@ class Web extends React.Component {
     this.setState({showCamera: true});
   };
 
-  _prepare = async () => {
-    //accessToken = this.props.navigation.state.params.accessToken;
+  /**
+   * Called to prepare the webview
+   * @param epId - todo:  Allow resuming based on the EpID passed in
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  _prepare = async (epIdResume) => {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
       //debugger;
       if (!accessToken) {
-        // alert('no access token');
         return false;
       } else {
         console.log(accessToken);
-        //alert(JSON.stringify(accessToken));
         //decode the token
 
         let decoded = jwtDecode(accessToken);
-
-        //email: 'jake.vauden@dexit.co', //'//decoded.email || 'jake.vauden@dexit.co',
         this.setState({
           email: decoded.email,
         });
@@ -606,9 +722,6 @@ class Web extends React.Component {
         if (data && data.element && data.element.intelligence) {
           //1: unload current EP (data.element.epId), and wait
           //2: load new element
-          debugger;
-          // self.showLoadingIndicator();
-          // self.bccLib.startTransition();
           self.goToEP(data.element.intelligence, data.element.epId);
         }
       });
@@ -622,6 +735,7 @@ class Web extends React.Component {
     let username = this.state.email.toLowerCase();
     let user = {};
 
+    //TEST user data
     if (username && username === 'jake.vauden@dexit.co') {
       args.user = {
         id: '4371',
@@ -743,10 +857,6 @@ class Web extends React.Component {
       alert('warning...could not load....please restart the app');
     }
 
-    // self.dexit.ep.lib.profile = {
-    //   user: user.args,
-    // };
-    // this.dexit.ep.lib.profile.user = args.user;
     dexit.ep.lib.profile.user = args.user;
 
     try {
@@ -756,13 +866,9 @@ class Web extends React.Component {
     } catch (e) {
       console.log('failed to load sdk config');
     }
-    // args.ice4mBCs = '';
 
     this.args = args;
-    // this.setState({args: args});
-    //this.args = args;
-    //this.user = args.user;
-    this.init();
+    this.init(epIdResume);
   };
 
   doRefresh(event) {
@@ -802,7 +908,47 @@ class Web extends React.Component {
     // });
   }
 
-  init() {
+  setKeychain(data) {
+    if (data && data.values) {
+      Keychain.setGenericPassword(data.values.phoneNumber, data.values.password)
+        .then(e => {
+          console.log('done');
+          this.bccLib.sendBehaviourResponse(data.callbackRef, null, {});
+        })
+        .catch(e => {
+          console.log('error saving password');
+          this.bccLib.sendBehaviourResponse(data.callbackRef, null, {});
+        });
+    }else {
+      this.bccLib.sendBehaviourResponse(data.callbackRef, null, {});
+    }
+  }
+
+  getFromKeychain(data) {
+    Keychain.getGenericPassword()
+      .then(credentials => {
+        if (credentials) {
+          console.log(
+            'Credentials successfully loaded for user ' + credentials.username,
+          );
+          this.bccLib.sendBehaviourResponse(data.callbackRef, null, {
+            phoneNumber: credentials.username,
+            password: credentials.password,
+          });
+        } else {
+          console.log('No credentials stored');
+          this.bccLib.sendBehaviourResponse(data.callbackRef, null, {});
+        }
+      })
+      .catch(e => {
+        this.bccLib.sendBehaviourResponse(data.callbackRef, null, {});
+      });
+  }
+
+  /**
+   * Called to initialize the content for viewing
+   */
+  init(epIdResume) {
     this.getToken((err, token) => {
       if (err) {
         alert('Please restart the app');
@@ -852,7 +998,10 @@ class Web extends React.Component {
             debugger;
           }
 
-          self.loadPortal(tpId, '', function(err) {
+          self.loadPortal(tpId, epIdResume, function(err) {
+            debugger;
+            //unable to laod portal
+
             console.log(err);
           });
         });
@@ -939,7 +1088,6 @@ class Web extends React.Component {
     // if (!this.state.loaded) {
     this.setState({loaded: true});
 
-
     // //now also inject JS
     // const run = `setTimeout(function() {
     //           jQuery(".hover-home .form-group input").each(function() {
@@ -961,7 +1109,7 @@ class Web extends React.Component {
     // this.sendMessage(run);
   }
 
-  loadPortal(tpId, bcType, callback) {
+  loadPortal(tpId, epIdResume, callback) {
     let self = this;
     // eslint-disable-next-line
     this.lastEPId = [];
@@ -971,43 +1119,37 @@ class Web extends React.Component {
     this.bccLib.resetAll();
     this.bccLib.setUser({id: self.state.user.id, name: self.state.user.name});
 
-    //this.getData(
-    this.loadEPCached(this.state.token, tpId)
-      .then(ep => {
-        // eslint-disable-next-line no-debugger
 
-        //console.log(data);
-        // let ep = (data && data.length > 0 ? data[0].epId : null);
-
-        // let found = _.filter(data, {touchpoint: tpId});
-        //
-        // //FIXME:
-        // //let ep = '234223';
-        //
-        // if (found.length > 0) {
-        //   var ep = found[found.length - 1].epId;
-        // }
-
-        if (!ep) {
-          console.log('no SC could be loaded');
-          self.bcloaded = true;
-          callback(new Error('could not load'));
-        } else {
-          self.bcloaded = true;
-
-
-          //ep = '234707';
-
-          self._showSubscriberEP(ep, this.refEp);
-          callback();
-        }
-      })
-      .catch(err => {
-        debugger;
-        console.log('no SC could be loaded: ' + JSON.stringify(err));
+    if (epIdResume) {
         self.bcloaded = true;
-        callback(err);
-      });
+        self._showSubscriberEP(epIdResume, this.refEp);
+        callback();
+    }else {
+
+      this.loadEPCached(this.state.token, tpId, epIdResume)
+          .then(ep => {
+            // eslint-disable-next-line no-debugger
+
+            if (!ep) {
+              console.log('no SC could be loaded');
+              self.bcloaded = true;
+              callback(new Error('could not load'));
+            } else {
+              self.bcloaded = true;
+
+              //ep = '234707';
+
+              self._showSubscriberEP(ep, this.refEp);
+              callback();
+            }
+          })
+          .catch(err => {
+            debugger;
+            console.log('no SC could be loaded: ' + JSON.stringify(err));
+            self.bcloaded = true;
+            callback(err);
+          });
+    }
   }
 
   initializeSDK(channelUrl, callback) {
@@ -1081,7 +1223,7 @@ class Web extends React.Component {
     });
   }
 
-  _showSubscriberEP(epId, refEp = '') {
+  _showSubscriberEP(epId, refEp = '', tryNumber) {
     //
     // this.tpId = dexit.device.sdk.getTouchpoint().touchpoint;
     // console.log('tpId');
@@ -1091,15 +1233,25 @@ class Web extends React.Component {
     //     }
     //     console.log('done');
     // });
-
-
+    tryNumber = tryNumber || 0;
     let epToUse = refEp || epId;
-    dexit.device.sdk.loadEngagementPattern(epToUse, null, function(err) {
+    dexit.device.sdk.loadEngagementPattern(epToUse, null, err => {
       if (err) {
         debugger;
         console.log('error loading');
         //TODO: show error
 
+        if (tryNumber > 3) {
+          alert(
+            'Could not reach to load...please check your internet connection, close the app and try again',
+          );
+          throw err;
+        }
+
+        setTimeout(() => {
+          tryNumber = tryNumber + 1;
+          this._showSubscriberEP(refEp, epId, tryNumber);
+        }, 500);
 
         // alert('failed to load pattern:' + epToUse);
         // alert(JSON.stringify(err));
@@ -1210,7 +1362,6 @@ class Web extends React.Component {
   onCodeCapture(data, passThroughData, selfRef) {
     //pass in the data
     //alert('QR data:' + data);
-    debugger;
     if (passThroughData && passThroughData.callbackRef) {
       if (data && _.isString(data)) {
         try {
@@ -1222,12 +1373,11 @@ class Web extends React.Component {
         null,
         data,
       );
-    }else {
+    } else {
       //TODO: go back?
     }
 
     console.log(data);
-
 
     debugger;
 
@@ -1245,9 +1395,8 @@ class Web extends React.Component {
       //enforce wait
       setTimeout(function() {
         self.sendMessage(data);
-      }, 200);
+      }, 50);
     } else {
-
       //setTimeout(function() {
       self.webview.current.injectJavaScript(data);
       //}, 100);
@@ -1261,6 +1410,8 @@ class Web extends React.Component {
   logoutPress = () => {
     this.props.onlogoutPress();
   };
+
+  renderOverlayImage() {}
 
   render() {
     // debugger;
@@ -1310,11 +1461,11 @@ class Web extends React.Component {
           ref={this.webview}
           // source={{html: '<div id="merch-container">Hello there</div>'}}
           // source={{html: require('./ep-home')()}}
-          onLoadStart={() => {
-            this.showLoadingIndicator();
-            this.setState({viewState: 'LOADING'});
-            //this.webview.current.setState({viewState: 'LOADING'});
-          }}
+          // onLoadStart={() => {
+          //   this.showLoadingIndicator();
+          //   this.setState({viewState: 'LOADING'});
+          //   //this.webview.current.setState({viewState: 'LOADING'});
+          // }}
           mediaPlaybackRequiresUserAction={false}
           allowsInlineMediaPlayback={true} //for ios
           bounces={false} //for ios
@@ -1330,20 +1481,46 @@ class Web extends React.Component {
           scalesPageToFit={false}
           allowFileAccess={true}
           allowFileAccessFromFileURLs={true}
-          key={this.state.key}
-          cacheMode={'LOAD_CACHE_ELSE_NETWORK'}
+          // key={this.state.key}
+          cacheMode={'LOAD_DEFAULT'}
           injectedJavaScript={`
-          $('body').scrollTop({0});`}
+          $('body').scrollTop(0);`}
           //renderLoading={this.ActivityIndicatorLoadingView}
           //startInLoadingState
         />
+        {/*{!this.state.loaded && (*/}
+        {/*  <ActivityIndicator*/}
+        {/*    color="#009688"*/}
+        {/*    size="large"*/}
+        {/*    style={styles.ActivityIndicatorStyle}*/}
+        {/*  />*/}
+        {/*)}*/}
+
+        {/*{!this.state.loaded && (*/}
+        {/*<View style={styles.imageContainer}>*/}
+        {/*  <Image*/}
+        {/*    style={styles.image}*/}
+        {/*    source={require('../assets/icons/world_cup3.jpg')}*/}
+        {/*  />*/}
+        {/*</View>*/}
+        {/*)}*/}
+
         {!this.state.loaded && (
-          <ActivityIndicator
-            color="#009688"
-            size="large"
-            style={styles.ActivityIndicatorStyle}
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              style={styles.image}
+              source={require('../assets/icons/edit3.gif')}
+            />
+          </View>
         )}
+
+        {/*<AnimatedLoader*/}
+        {/*    visible={!this.state.loaded}*/}
+        {/*    overlayColor="#FFFFFF"*/}
+        {/*    source={require("../assets/icons/circle.json")}*/}
+        {/*    animationStyle={styles.lottie}*/}
+        {/*    speed={1.5}*/}
+        {/*/>*/}
 
         {/*{!this.state.showCamera &&*/}
         {/*<View style={styles.CameraViewIndicator}>*/}
@@ -1364,7 +1541,39 @@ const styles = StyleSheet.create({
     flex: 1,
     width: wp('99%'),
   },
-
+  // loadImage: {
+  //   position: 'absolute',
+  //   resizeMode: 'stretch',
+  //   width: wp('99%'),
+  //   height: wp('100%'),
+  //   // flex: 1,
+  //   left: 0,
+  //   right: 0,
+  //   top: 0,
+  //   bottom: 0,
+  // },
+  imageContainer: {
+    // flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    // alignItems: 'cover',
+  },
+  image: {
+    //for full screen
+    height: hp('50%'),
+    width: wp('50%'),
+    zIndex: 999999999,
+  },
+  lottie: {
+    width: 200,
+    height: 200,
+  },
   ActivityIndicatorStyle: {
     position: 'absolute',
     left: 0,
@@ -1373,7 +1582,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(226,120,44,0.4)',
+    backgroundColor: 'rgba(226,120,44,0.09)',
+    // backgroundImage: `url(${Background})`,
+    // backgroundPosition: 'center',
+    // backgroundRepeat: 'no-repeat',
   },
   CameraViewIndicator: {
     position: 'absolute',
@@ -1384,6 +1596,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
+  },
+  logo: {
+    alignSelf: 'center',
+    width: wp('30%'),
+    height: wp('30%'),
   },
 });
 
