@@ -35,30 +35,18 @@ class App extends React.Component {
     const {navigation} = this.props;
 
     if (nextAppState === 'background' || nextAppState === 'inactive') {
-      // Do something here on app background.
+      //TODO: Do something here on app background to save the state the the App
       console.log('*******APP: going to Background Mode.*****');
-
-
-      // const varx = navigation.getParam('paramSaveState', null);
-
-
-
-``
     } else {
       console.log('*******APP: nextAppState ' + nextAppState + '*****');
     }
 
     if (nextAppState === 'active') {
-      // Do something here on app active foreground mode.
+      //TODO: Do something here on app active foreground mode.
       console.log('App is in Active Foreground Mode.');
       let s = await AsyncStorage.getItem('appState')
       console.log('appState:' + s);
     }
-    //
-    // if (nextAppState === 'inactive') {
-    //   // Do something here on app inactive mode.
-    //   console.log("App is in inactive Mode.")
-    // }
   };
 
   componentDidMount() {
