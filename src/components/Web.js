@@ -512,9 +512,7 @@ class Web extends React.Component {
     });
   }
 
-  // componentDidMount() {
-  //   this._prepare();
-  // }
+
   componentDidMount() {
     debugger;
 
@@ -692,22 +690,23 @@ class Web extends React.Component {
     this.setState({showCamera: true});
   };
 
-  _prepare = async () => {
-    //accessToken = this.props.navigation.state.params.accessToken;
+  /**
+   * Called to prepare the webview
+   * @param epId - todo:  Allow resuming based on the EpID passed in
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  _prepare = async (epIdResume) => {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
       //debugger;
       if (!accessToken) {
-        // alert('no access token');
         return false;
       } else {
         console.log(accessToken);
-        //alert(JSON.stringify(accessToken));
         //decode the token
 
         let decoded = jwtDecode(accessToken);
-
-        //email: 'jake.vauden@dexit.co', //'//decoded.email || 'jake.vauden@dexit.co',
         this.setState({
           email: decoded.email,
         });
@@ -717,23 +716,12 @@ class Web extends React.Component {
       //alert(err);
     }
 
-    this._loadAppData()
-      .then(data => {
-        debugger;
-      })
-      .catch(e => {
-        debugger;
-      });
-
     let self = this;
     if (!self.epGoToken) {
       self.epGoToken = PubSub.subscribe('dexit.ep.go', function(msg, data) {
         if (data && data.element && data.element.intelligence) {
           //1: unload current EP (data.element.epId), and wait
           //2: load new element
-          debugger;
-          // self.showLoadingIndicator();
-          // self.bccLib.startTransition();
           self.goToEP(data.element.intelligence, data.element.epId);
         }
       });
@@ -747,6 +735,7 @@ class Web extends React.Component {
     let username = this.state.email.toLowerCase();
     let user = {};
 
+    //TEST user data
     if (username && username === 'jake.vauden@dexit.co') {
       args.user = {
         id: '4371',
@@ -868,10 +857,6 @@ class Web extends React.Component {
       alert('warning...could not load....please restart the app');
     }
 
-    // self.dexit.ep.lib.profile = {
-    //   user: user.args,
-    // };
-    // this.dexit.ep.lib.profile.user = args.user;
     dexit.ep.lib.profile.user = args.user;
 
     try {
@@ -881,13 +866,9 @@ class Web extends React.Component {
     } catch (e) {
       console.log('failed to load sdk config');
     }
-    // args.ice4mBCs = '';
 
     this.args = args;
-    // this.setState({args: args});
-    //this.args = args;
-    //this.user = args.user;
-    this.init();
+    this.init(epIdResume);
   };
 
   doRefresh(event) {
@@ -964,7 +945,10 @@ class Web extends React.Component {
       });
   }
 
-  init() {
+  /**
+   * Called to initialize the content for viewing
+   */
+  init(epIdResume) {
     this.getToken((err, token) => {
       if (err) {
         alert('Please restart the app');
@@ -1014,7 +998,7 @@ class Web extends React.Component {
             debugger;
           }
 
-          self.loadPortal(tpId, '', function(err) {
+          self.loadPortal(tpId, epIdResume, function(err) {
             debugger;
             //unable to laod portal
 
@@ -1125,7 +1109,7 @@ class Web extends React.Component {
     // this.sendMessage(run);
   }
 
-  loadPortal(tpId, bcType, callback) {
+  loadPortal(tpId, epIdResume, callback) {
     let self = this;
     // eslint-disable-next-line
     this.lastEPId = [];
@@ -1135,42 +1119,37 @@ class Web extends React.Component {
     this.bccLib.resetAll();
     this.bccLib.setUser({id: self.state.user.id, name: self.state.user.name});
 
-    //this.getData(
-    this.loadEPCached(this.state.token, tpId)
-      .then(ep => {
-        // eslint-disable-next-line no-debugger
 
-        //console.log(data);
-        // let ep = (data && data.length > 0 ? data[0].epId : null);
-
-        // let found = _.filter(data, {touchpoint: tpId});
-        //
-        // //FIXME:
-        // //let ep = '234223';
-        //
-        // if (found.length > 0) {
-        //   var ep = found[found.length - 1].epId;
-        // }
-
-        if (!ep) {
-          console.log('no SC could be loaded');
-          self.bcloaded = true;
-          callback(new Error('could not load'));
-        } else {
-          self.bcloaded = true;
-
-          //ep = '234707';
-
-          self._showSubscriberEP(ep, this.refEp);
-          callback();
-        }
-      })
-      .catch(err => {
-        debugger;
-        console.log('no SC could be loaded: ' + JSON.stringify(err));
+    if (epIdResume) {
         self.bcloaded = true;
-        callback(err);
-      });
+        self._showSubscriberEP(epIdResume, this.refEp);
+        callback();
+    }else {
+
+      this.loadEPCached(this.state.token, tpId, epIdResume)
+          .then(ep => {
+            // eslint-disable-next-line no-debugger
+
+            if (!ep) {
+              console.log('no SC could be loaded');
+              self.bcloaded = true;
+              callback(new Error('could not load'));
+            } else {
+              self.bcloaded = true;
+
+              //ep = '234707';
+
+              self._showSubscriberEP(ep, this.refEp);
+              callback();
+            }
+          })
+          .catch(err => {
+            debugger;
+            console.log('no SC could be loaded: ' + JSON.stringify(err));
+            self.bcloaded = true;
+            callback(err);
+          });
+    }
   }
 
   initializeSDK(channelUrl, callback) {
