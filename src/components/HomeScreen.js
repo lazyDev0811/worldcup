@@ -28,10 +28,8 @@ import {default as Web} from './Web';
 let access_Token = '';
 let refresh_Token = '';
 let accessTokenExpirationDate = '';
-// let html = require('./ep-home');
 let htmlLoad = '<b>Load</b>';
 let key = 1;
-
 
 class HomeScreen extends Component {
   constructor(props) {
